@@ -1,0 +1,4 @@
+ModuleConfig:
+    SIPM: []
+    MCP: []
+    MID2-CH2: [150, 350]
