@@ -7,20 +7,20 @@
 
 int mapping_generator(std::string inputMap) {
 
-	int mid;
-	int ch;
-	int cases;
-	int nChannel;
-	int isCeren;
-	int row;
-	int column;
+	int mid = 0;
+	int ch = 0;
+	TString name = "";
+	int cases = 0;
+	int isCeren = 0;
+	int row = 0;
+	int column = 0;
 
 	TTree* aTree = new TTree("mapping", "mapping");
 
 	aTree->Branch("mid", &mid);
 	aTree->Branch("ch", &ch);
+	aTree->Branch("name", &name);
 	aTree->Branch("cases", &cases);
-	aTree->Branch("nChannel", &nChannel);
 	aTree->Branch("isCeren", &isCeren);
 	aTree->Branch("row", &row);
 	aTree->Branch("column", &column);
@@ -28,7 +28,7 @@ int mapping_generator(std::string inputMap) {
   std::ifstream in;
   in.open(inputMap + ".csv", std::ios::in);
   while (true) {
-    in >> mid >> ch >> cases >> nChannel >> isCeren >> row >> column;
+    in >> mid >> ch >> name >> cases >> isCeren >> row >> column;
     if (!in.good()) break;
     aTree->Fill();
   }
