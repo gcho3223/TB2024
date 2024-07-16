@@ -1,16 +1,14 @@
 #include "TBplotengine.h"
 
-TBplotengine::TBplotengine(const YAML::Node fNodePlot_, int fRunNum_, TButility fUtility_, bool fUseExPed_)
-		: fNodePlot(fNodePlot_), fRunNum(fRunNum_), fUtility(fUtility_), fUseExPed(fUseExPed_), fCaseName("")
+TBplotengine::TBplotengine(const YAML::Node fNodePlot_, int fRunNum_, TButility fUtility_)
+		: fNodePlot(fNodePlot_), fRunNum(fRunNum_), fUtility(fUtility_), fCaseName("")
 {
 	init();
 }
 
 void TBplotengine::init()
 {
-	fUtility.loading("/u/user/swkim/DRC/2023_TB/TB2023/mapping/mapping_TB2021July_v1.root");
-	if (fUseExPed)
-		fUtility.loadped("/Users/khwang/scratch/TB2023July/sample/Info/Run" + std::to_string(fRunNum) + "_pedestalHist_mean.root");
+	fUtility.loading("/Users/khwang/Library/Mobile Documents/com~apple~CloudDocs/Drive/scratch/TB2024/dev_240715/TB2024/mapping/mapping_TB2024_v1.root");
 
 	std::cout << "starting INIT" << std::endl;
 
@@ -250,8 +248,8 @@ Plotter *TBplotengine::getPlot(std::string plotName, TBcid cid, TBplotengine::Pl
 	{
 		TString name = "IntADC_" + plotName;
 		float ped = -1;
-		if (fUseExPed)
-			fUtility.retrievePed(cid);
+		// if (fUseExPed)
+		// 	fUtility.retrievePed(cid);
 
 		int nBin = node["nBin"].as<int>();
 		float xMin = node["xMin"].as<float>();
@@ -274,8 +272,8 @@ Plotter *TBplotengine::getPlot(std::string plotName, TBcid cid, TBplotengine::Pl
 	{
 		TString name = "PeakADC_" + plotName;
 		float ped = -1;
-		if (fUseExPed)
-			fUtility.retrievePed(cid);
+		// if (fUseExPed)
+		// 	fUtility.retrievePed(cid);
 
 		float nBin = node["nBin"].as<int>();
 		float xMin = node["xMin"].as<float>();

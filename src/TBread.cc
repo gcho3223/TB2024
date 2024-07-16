@@ -1,17 +1,24 @@
 #include "TBread.h"
 #include "TBmid.h"
 #include "TBevt.h"
+#include "TButility.h"
 
 #include <stdexcept>
+#include <chrono>
+#include <format>
 
+#include "TSystem.h"
 #include "TFile.h"
 #include "TTree.h"
 
 template <typename T>
-FileController<T>::FileController(int fRunNum_, int fMID_, std::string fBaseDir_, int fMaxFileNum_)
-    : fMode(), fRawData(0), fRunNum(fRunNum_), fMID(fMID_), fBaseDir(fBaseDir_), fNextFileNum(0), fMaxFileNum(fMaxFileNum_), fTotalEventNum(0), fCurrentEventNum(0), fTotalMaxEventNum(0), fCurrentMaxEventNum(0)
+FileController<T>::FileController(int fRunNum_, bool fIsLive_, int fMID_, std::string fBaseDir_, int fMaxFileNum_)
+    : fMode(), fRawData(0), fRunNum(fRunNum_), fIsLive(fIsLive_), fMID(fMID_), fBaseDir(fBaseDir_), fNextFileNum(0), fMaxFileNum(fMaxFileNum_), fTotalEventNum(0), fCurrentEventNum(0), fTotalMaxEventNum(0), fCurrentMaxEventNum(0)
 {
-  init();
+  ANSI = ANSI_CODE();
+
+  if (!fIsLive)
+    init();
 }
 
 template <typename T>
@@ -26,7 +33,7 @@ void FileController<T>::init()
     {
       int maxEvent = GetMaximum(fMode, aFileName);
       fTotalMaxEventNum += maxEvent;
-      std::cout << "file scanning : " << aFileName << " - Max Event : " << maxEvent << " / " << fTotalMaxEventNum << std::endl;
+      // std::cout << "file scanning : " << aFileName << " - Max Event : " << maxEvent << " / " << fTotalMaxEventNum << std::endl;
     }
     else
     {
@@ -62,7 +69,7 @@ void FileController<T>::OpenFile()
   fFileName = GetFileName();
 
   if (access(fFileName.c_str(), F_OK))
-    throw std::runtime_error("FileController<T>::OpenFile - Does not exist : " + fFileName);
+    throw std::runtime_error(ANSI.RED + ANSI.BOLD + "FileController<T>::OpenFile - Does not exist : " + fFileName + ANSI.END);
 
   fCurrentMaxEventNum = GetMaximum();
   fCurrentEventNum = 0;
@@ -70,9 +77,11 @@ void FileController<T>::OpenFile()
   fRawData = fopen(fFileName.c_str(), "rb");
 
   if (fRawData == NULL)
-    throw std::runtime_error("FileController<T>::OpenFile - File might be wrong? : " + fFileName);
+    throw std::runtime_error(ANSI.RED + ANSI.BOLD + "FileController<T>::OpenFile - File might be damaged? : " + fFileName + ANSI.END);
 
   fNextFileNum++;
+
+  std::cout << ANSI.BOLD + "File scanning : " + ANSI.END << ANSI.GREEN + ANSI.BOLD + fFileName + ANSI.END << " - Current : " << fCurrentEventNum << " / " << fTotalEventNum << " - Max Event : " << fCurrentMaxEventNum << " / " << fTotalMaxEventNum << std::endl;
 }
 
 template <typename T>
@@ -138,12 +147,41 @@ int FileController<T>::GetMaximum(TBfastmode fMode_, std::string filename)
 }
 
 template <typename T>
+void FileController<T>::LiveReadyForNextFile() {
+
+  std::string aFileName = GetFileName();
+  fTotalMaxEventNum += GetMaximum(fMode, aFileName);;
+}
+
+template <typename T>
+bool FileController<T>::CheckSingleNextNextFileExistence() {
+
+  std::string tmpFileName = GetFileName(fMode, fNextFileNum + 1);
+
+  if (access(tmpFileName.c_str(), F_OK))
+    return false;
+
+  return true;
+}
+
+template <typename T>
+bool FileController<T>::CheckSingleNextFileExistence() {
+
+  std::string tmpFileName = GetFileName(fMode, fNextFileNum);
+
+  if (access(tmpFileName.c_str(), F_OK))
+    return false;
+
+  return true;
+}
+
+template <typename T>
 void FileController<T>::CheckOverflow()
 {
 
   if (fCurrentEventNum == fCurrentMaxEventNum)
   {
-    std::cout << "end of the file!" << std::endl;
+    // std::cout << "end of the file!" << std::endl;
     fclose(fRawData);
     OpenFile();
   }
@@ -361,13 +399,18 @@ TBmid<TBfastmode> FileController<T>::ReadFastmodeMid()
 }
 
 template <typename T>
-TBread<T>::TBread(int fRunNum_, int fMaxEvent_, int fMaxFile_, std::string fBaseDir_, std::vector<int> fMIDMap_)
-    : fRunNum(fRunNum_), fMaxEvent(fMaxEvent_), fMaxFile(fMaxFile_), fBaseDir(fBaseDir_), fMIDMap(fMIDMap_)
+TBread<T>::TBread(int fRunNum_, int fMaxEvent_, int fMaxFile_, bool fIsLive_, std::string fBaseDir_, std::vector<int> fMIDMap_)
+    : fRunNum(fRunNum_), fMaxEvent(fMaxEvent_), fMaxFile(fMaxFile_), fCurrentEvent(0), fIsLive(fIsLive_), fBaseDir(fBaseDir_), fMIDMap(fMIDMap_)
 {
+  ANSI = ANSI_CODE();
   if (fMaxFile == -1)
     fMaxFile = 999;
 
-  init();
+  if (fIsLive)
+    fMaxFile = 1;
+
+  if (!fIsLive) init();
+  else          init_live();
 }
 
 template <typename T>
@@ -377,7 +420,7 @@ void TBread<T>::init()
   fFileMap.clear();
 
   for (auto aMid : fMIDMap)
-    fFileMap.insert(std::make_pair(aMid, new FileController<T>(fRunNum, aMid, fBaseDir, fMaxFile)));
+    fFileMap.insert(std::make_pair(aMid, new FileController<T>(fRunNum, fIsLive, aMid, fBaseDir, fMaxFile)));
 
   int tmpMax = 99999999;
   for (int i = 0; i < fMIDMap.size(); i++)
@@ -399,6 +442,68 @@ void TBread<T>::init()
 }
 
 template <typename T>
+void TBread<T>::init_live()
+{
+  fFileMap.clear();
+
+  for (auto aMid : fMIDMap)
+    fFileMap.insert(std::make_pair(aMid, new FileController<T>(fRunNum, fIsLive, aMid, fBaseDir, fMaxFile)));
+
+}
+
+template <typename T>
+void TBread<T>::CheckNextFileExistence()
+{
+
+  std::cout << "                                       |";
+  for (int i = 0; i < fMIDMap.size(); i++) {
+    if (fMIDMap.at(i) >= 10) std::cout << " MID" + std::to_string(fMIDMap.at(i)) + " |";
+    else                     std::cout << " MID " + std::to_string(fMIDMap.at(i)) + " |";
+  }
+  std::cout << " " << std::endl;
+
+  std::cout << "---------------------------------------";
+  for (int i = 0; i < fMIDMap.size(); i++) {
+    std::cout << "--------";
+  }
+  std::cout << "-" << std::endl;
+
+  while(1) {
+
+    std::time_t tNowClock = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    std::string tNow(30, '\0');
+    std::strftime(&tNow[0], tNow.size(), "%Y-%m-%d %H:%M:%S", std::localtime(&tNowClock));
+
+    std::cout << "Waiting for file : " << ANSI.YELLOW + ANSI.BOLD + tNow + ANSI.END + " ";
+
+    bool ready = true;
+    for (int i = 0; i < fMIDMap.size(); i++) {
+      bool hasNext = fFileMap.at(fMIDMap.at(i))->CheckSingleNextFileExistence();
+      bool hasNextNext = fFileMap.at(fMIDMap.at(i))->CheckSingleNextNextFileExistence();
+
+      bool isReady = hasNext && hasNextNext;
+      ready = ready && isReady;
+
+      if(isReady) std::cout << "|   " + ANSI.GREEN + ANSI.BOLD + "O   " + ANSI.END;
+      else        std::cout << "|   " + ANSI.RED + ANSI.BOLD + "X   " + ANSI.END;
+    }
+    std::cout << "|" << std::endl;
+
+    if (ready) {
+      for (int i = 0; i < fMIDMap.size(); i++)
+        fFileMap.at(fMIDMap.at(i))->LiveReadyForNextFile();
+
+
+      std::cout << ANSI.BOLD + ANSI.UNDERLINE_THICK + "Files are ready, updating plots." + ANSI.END << std::endl;
+      break;
+    }
+
+    gSystem->Sleep(5000);
+  }
+}
+
+template <typename T>
 TBevt<T> TBread<T>::GetAnEvent()
 {
 
@@ -410,7 +515,7 @@ TBevt<T> TBread<T>::GetAnEvent()
   int ref_event = fFileMap.at(fMIDMap.at(0))->GetTotalEventNum();
   for (int i = 1; i < fMIDMap.size(); i++)
     if (fFileMap.at(fMIDMap.at(i))->GetTotalEventNum() != ref_event)
-      throw std::runtime_error("TBread<T>::GetAnEvent() - event num does not match MID : " + std::to_string(fMIDMap.at(i)));
+      throw std::runtime_error(ANSI.RED + ANSI.BOLD + "TBread<T>::GetAnEvent() - event num does not match between MIDs : " + std::to_string(fMIDMap.at(i)) + ANSI.END);
 
   // for (auto aMID : anEvent) {
   //   std::cout << aMID.first << " " << aMID.second.mid() << std::endl;
@@ -420,7 +525,30 @@ TBevt<T> TBread<T>::GetAnEvent()
 
   returnEvt.Set(anEvent);
 
+  fCurrentEvent++;
   return std::move(returnEvt);
+}
+
+template <typename T>
+int TBread<T>::GetLiveMaxEvent() {
+
+  int tmpMax = 99999999;
+  for (int i = 0; i < fMIDMap.size(); i++)
+    if (tmpMax > fFileMap.at(fMIDMap.at(i))->GetTotalMaxEventNum())
+      tmpMax = fFileMap.at(fMIDMap.at(i))->GetTotalMaxEventNum();
+
+  return tmpMax;
+}
+
+template <typename T>
+int TBread<T>::GetLiveCurrentEvent() {
+
+  int tmpMax = 99999999;
+  for (int i = 0; i < fMIDMap.size(); i++)
+    if (tmpMax > fFileMap.at(fMIDMap.at(i))->GetTotalEventNum())
+      tmpMax = fFileMap.at(fMIDMap.at(i))->GetTotalEventNum();
+
+  return tmpMax;
 }
 
 template class TBread<TBwaveform>;

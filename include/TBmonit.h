@@ -7,7 +7,6 @@
 // #include <boost/python.hpp>
 
 #include "TFile.h"
-#include "TPad.h"
 #include "TBconfig.h"
 #include "TBread.h"
 
@@ -24,6 +23,7 @@ public:
 
   void SetMaxEvent(int fMaxEvent_) { fMaxEvent = fMaxEvent_; }
   void SetMaxFile(int fMaxFile_) { fMaxFile = fMaxFile_; }
+  void SetLive() { fIsLive = true; }
 
 private:
   TBconfig fConfig;
@@ -31,6 +31,8 @@ private:
   int fRunNum;
   int fMaxEvent;
   int fMaxFile;
+
+  bool fIsLive;
 };
 
 #endif

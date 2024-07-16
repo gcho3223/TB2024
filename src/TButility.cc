@@ -4,52 +4,16 @@
 #include <stdexcept>
 #include <fstream>
 
-TBdetector::detid TButility::detid(int tid) const
+void TButility::LoadMapping(const std::string &path)
 {
 
-  // if ( static_cast<int>(TBdetector::detid::DWC1analogue) <= tid &&
-  //      static_cast<int>(TBdetector::detid::DWC1digital) > tid )
-  //   return TBdetector::detid::DWC1analogue;
-  // if ( static_cast<int>(TBdetector::detid::DWC1digital) <= tid &&
-  //      static_cast<int>(TBdetector::detid::DWC2analogue) > tid )
-  //   return TBdetector::detid::DWC1digital;
-  // if ( static_cast<int>(TBdetector::detid::DWC2analogue) <= tid &&
-  //      static_cast<int>(TBdetector::detid::DWC2digital) > tid )
-  //   return TBdetector::detid::DWC2analogue;
-  // if ( static_cast<int>(TBdetector::detid::DWC2digital) <= tid &&
-  //      static_cast<int>(TBdetector::detid::extTrig1) > tid )
-  //   return TBdetector::detid::DWC2digital;
-
-  if (static_cast<int>(TBdetector::detid::aux) == tid)
-    return TBdetector::detid::aux;
-  if (static_cast<int>(TBdetector::detid::ext) == tid)
-    return TBdetector::detid::ext;
-  if (static_cast<int>(TBdetector::detid::ceren) == tid)
-    return TBdetector::detid::ceren;
-  if (static_cast<int>(TBdetector::detid::SFHS) == tid)
-    return TBdetector::detid::SFHS;
-  if (static_cast<int>(TBdetector::detid::LEGO) == tid)
-    return TBdetector::detid::LEGO;
-  if (static_cast<int>(TBdetector::detid::MCPPMT_gen) == tid)
-    return TBdetector::detid::MCPPMT_gen;
-  if (static_cast<int>(TBdetector::detid::MCPPMT) == tid)
-    return TBdetector::detid::MCPPMT;
-  if (static_cast<int>(TBdetector::detid::SiPM) == tid)
-    return TBdetector::detid::SiPM;
-
-  return TBdetector::detid::nulldet;
-}
-
-void TButility::loading(const std::string &path)
-{
-
-  int mid;
-  int ch;
-  int cases;
-  int nChannel;
-  int isCeren;
-  int row;
-  int column;
+  int mid = 0;
+	int ch = 0;
+	TString* name = nullptr;
+	int cases = 0;
+	int isCeren = 0;
+	int row = 0;
+	int column = 0;
 
   std::cout << "Loading mapping file : " << path << std::endl;
 
@@ -128,105 +92,25 @@ void TButility::loading(const std::string &path)
   delete mapChain;
 }
 
-TBdetector TButility::find(const TBcid &cid) const
-{
-  if (mapping_.find(cid) == mapping_.end())
-    return TBdetector(TBdetector::detid::nulldet);
-
-  return mapping_.at(cid);
+TBcid TButility::GetCID(TString name) const {
+  if (mapping_NAME_CID.find(name) == mapping_NAME_CID.end()) return TBcid(-1, -1);
+  else return mapping_NAME_CID.at(name);
 }
 
-void TButility::loadped(const std::string &path)
-{
-
-  TH2F *pedMap = (TH2F *)(TFile::Open((TString)path)->Get("pedestal"));
-
-  float ped;
-
-  for (int mid = 1; mid <= 15; mid++)
-  {
-    for (int ch = 1; ch <= 32; ch++)
-    {
-
-      ped = pedMap->GetBinContent(mid, ch);
-
-      auto cid = TBcid(mid, ch);
-      pedmap_.insert(std::make_pair(cid, ped));
-    }
-  }
-
-  delete pedMap;
-};
-
-float TButility::retrievePed(const TBcid &cid) const
-{
-  if (pedmap_.find(cid) == pedmap_.end())
-  {
-    cid.print();
-    throw std::runtime_error("TButility - cannot find pedestal of the TBcid!");
-  }
-
-  return pedmap_.at(cid);
+TString TButility::GetName(TBcid cid) const {
+  if (mapping_CID_NAME.find(cid) == mapping_CID_NAME.end()) return "null";
+  else return mapping_CID_NAME.at(cid);
 }
 
-TBcid TButility::getcid(TBdetector::detid did) const
-{
-
-  for (auto detInfo : mapping_)
-    if (detInfo.second.det() == did)
-      return detInfo.first;
-
-  return TBcid(0, 0);
+mod_info TButility::GetInfo(TBcid cid) const {
+  if (mapping_CID_INFO.find(cid) == mapping_CID_INFO.end()) return mod_info(-1, -1, -1, -1);
+  else return mapping_CID_INFO.at(cid);
 }
 
-TBcid TButility::getcid(TBdetector::detid did, int module, int tower, bool isCeren) const
-{
+mod_info TButility::GetInfo(TString name) const {
+  TBcid aCID = GetCID(name);
+  if (aCID == TBcid(-1, -1))
+    return mod_info(-1, -1, -1, -1);
 
-  for (auto detInfo : mapping_)
-    if (detInfo.second.det() == did && detInfo.second.module() == module && detInfo.second.tower() == tower && detInfo.second.isCeren() == isCeren)
-      return detInfo.first;
-
-  return TBcid(0, 0);
-}
-
-TBcid TButility::getcid(int module, int tower, bool isCeren) const
-{
-
-  for (auto detInfo : mapping_)
-    if (detInfo.second.module() == module && detInfo.second.tower() == tower && detInfo.second.isCeren() == isCeren)
-      return detInfo.first;
-
-  return TBcid(0, 0);
-}
-
-TBcid TButility::getcid(int did, int module, int tower, bool isCeren) const
-{
-
-  TBdetector::detid detid = TButility::detid(did);
-
-  for (auto detInfo : mapping_)
-    if (detInfo.second.det() == detid && detInfo.second.module() == module && detInfo.second.tower() == tower && detInfo.second.isCeren() == isCeren)
-      return detInfo.first;
-
-  return TBcid(0, 0);
-}
-
-TBcid TButility::getcid(TBdetector::detid did, int module, int tower, int column, int row, bool isCeren) const
-{
-
-  for (auto detInfo : mapping_)
-    if (detInfo.second.det() == did && detInfo.second.module() == module && detInfo.second.tower() == tower && detInfo.second.column() == column && detInfo.second.row() == row && detInfo.second.isCeren() == isCeren)
-      return detInfo.first;
-
-  return TBcid(0, 0);
-}
-
-TBcid TButility::getcid(TBdetector::detid did, int tower, int column, int row, bool isCeren) const
-{
-
-  for (auto detInfo : mapping_)
-    if (detInfo.second.det() == did && detInfo.second.column() == column && detInfo.second.row() == row && detInfo.second.isCeren() == isCeren)
-      return detInfo.first;
-
-  return TBcid(0, 0);
+  return GetInfo(aCID);
 }

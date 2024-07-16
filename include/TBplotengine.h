@@ -166,7 +166,7 @@ public:
 class TBplotengine
 {
 public:
-	TBplotengine(const YAML::Node fNodePlot_, int fRunNum_, TButility fUtility_, bool fUseExPed_);
+	TBplotengine(const YAML::Node fNodePlot_, int fRunNum_, TButility fUtility_);
 	~TBplotengine() {}
 
 	enum PlotInfo
@@ -199,7 +199,6 @@ private:
 	const YAML::Node fNodePlot;
 	int fRunNum;
 	TButility fUtility;
-	bool fUseExPed;
 
 	std::string fCaseName;
 
