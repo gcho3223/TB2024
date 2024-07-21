@@ -19,24 +19,43 @@ public:
   TButility() {}
   ~TButility() {}
 
-  void loading(const std::string &path);
-  void loadped(const std::string &path);
+  struct mod_info {
+    int cases;
+    int isCeren;
+    int row;
+    int col;
 
-  TBdetector::detid detid(int tid) const;
-  TBdetector find(const TBcid &cid) const;
-  float retrievePed(const TBcid &cid) const;
-  int pid(float psadc, float muadc) const;
+    mod_info(int cases_, int isCeren_, int row_, int col_)
+    : cases(cases_), isCeren(isCeren_), row(row_), col(col_)
+    {}
+  };
 
-  TBcid getcid(TBdetector::detid did) const;
-  TBcid getcid(TBdetector::detid did, int module, int tower, bool isCeren) const;
-  TBcid getcid(int did, int module, int tower, bool isCeren) const;
-  TBcid getcid(int module, int tower, bool isCeren) const;
-  TBcid getcid(TBdetector::detid did, int module, int tower, int column, int plate, bool isCeren) const;
-  TBcid getcid(TBdetector::detid did, int module, int column, int row, bool isCeren) const;
+  void LoadMapping(const std::string &path);
+
+  TBcid GetCID(TString name) const;
+  std::string GetName(TBcid cid) const;
+  mod_info GetInfo(TBcid cid) const;
+  mod_info GetInfo(TString name) const;
+
+  std::vector<int> GetUniqueMID(std::vector<TBcid> aCID) {
+    std::vector<int> return_vec;
+    std::map<int, int> aMap;
+
+    for (int i = 0; i < aCID.size(); i++) {
+      if (aMap.find(aCID.at(i).mid()) == aMap.end()) {
+        return_vec.push_back(aCID.at(i).mid());
+        aMap.insert(std::make_pair(aCID.at(i).mid(), 1));
+      }
+    }
+
+    return return_vec;
+  }
 
 private:
-  std::map<TBcid, TBdetector> mapping_;
-  std::map<TBcid, float> pedmap_;
+  std::map<TBcid, std::string> mapping_CID_NAME;
+  std::map<TBcid, mod_info> mapping_CID_INFO;
+  std::map<TString, TBcid> mapping_NAME_CID;
+
 };
 
 #endif

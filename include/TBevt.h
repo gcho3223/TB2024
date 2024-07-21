@@ -17,6 +17,12 @@ public:
   void Set(std::map<int, TBmid<T>> fMapMids_) { fMapMids = fMapMids_; }
   void SetEvent(int fEvent_) { fEvent = fEvent_; }
 
+  void Print() {
+    std::cout << "Total size : " << Size() << std::endl;
+    for (auto aMap : fMapMids)
+      std::cout << aMap.first << " " << aMap.second.mid() << std::endl;
+  }
+
   int GetEventNum() { return fEvent; }
 
   // TBmid<T> Mid(unsigned idx) const { return mids_.at(idx); }

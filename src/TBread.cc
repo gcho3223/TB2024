@@ -525,6 +525,9 @@ TBevt<T> TBread<T>::GetAnEvent()
 
   returnEvt.Set(anEvent);
 
+  // std::cout << returnEvt.Size() << std::endl;
+  // returnEvt.Print();
+
   fCurrentEvent++;
   return std::move(returnEvt);
 }

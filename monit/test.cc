@@ -1,5 +1,9 @@
 #include "TBmonit.h"
 #include "TBread.h"
+#include "TBplotengine.h"
+#include "TBdetector.h"
+#include "TButility.h"
+#include "TBconfig.h"
 
 #include <chrono>
 #include "stdlib.h"
@@ -14,6 +18,9 @@
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
+
+#include "TApplication.h"
+#include "TSystem.h"
 
 void GetFormattedRamInfo() {
     // Total physical memory
@@ -39,7 +46,7 @@ void GetFormattedRamInfo() {
             double used_memory_GB = total_memory_GB - free_memory_GB;
 
 
-            printf("%.1f GB / %.1f GB (%0.2f %%) | Current Process: %.2f (%.2f %%)",
+            printf("%.1f GB / %.1f GB (%0.2f %%) | Current Process: %.2f MB (%.2f %%)",
               used_memory_GB, total_memory_GB, (used_memory_GB / total_memory_GB * 100),
               process_memory_GB * 1024., (process_memory_GB / total_memory_GB * 100));
         }
@@ -53,10 +60,45 @@ int main(int argc, char *argv[])
   int fMaxFile = -1;
   bool fIsLive = 1;
 
+  // TApplication *theApp = new TApplication("app", &argc, argv);
+  // theApp->SetReturnFromRun(true);
+
+  // TButility util = TButility();
+  // util.LoadMapping("../mapping/mapping_TB2024_v1.root");
+
   ANSI_CODE ANSI = ANSI_CODE();
 
-  std::vector<int> vecMIDs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-  // std::vector<int> vecMIDs = {1};
+  // 1 17 M11-T1-S 1 0 0 0
+  // 1 18 M11-T2-S 1 0 0 0
+  // 1 19 M11-T3-S 1 0 0 0
+  // 1 20 M11-T4-S 1 0 0 0
+  // 1 21 M11-T6-S 1 0 0 0
+  // 1 22 M11-T7-S 1 0 0 0
+  // 1 23 M11-T8-S 1 0 0 0
+  // 1 24 M11-T9-S 1 0 0 0
+  // 1 25 M11-T1-C 1 1 0 0
+  // 1 26 M11-T2-C 1 1 0 0
+  //
+  // 3 1 M1-T1-C 1 1 0 0
+  // 3 2 M1-T2-C 1 1 0 0
+  // 3 3 M1-T3-C 1 1 0 0
+  // 3 4 M1-T4-C 1 1 0 0
+
+
+  std::vector<TBcid> aCID = {TBcid(1, 17), TBcid(3,4)};
+
+  // std::vector<int> vecMIDs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+  // std::vector<int> vecMIDs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+  std::vector<int> vecMIDs = {1, 3};
+
+  TBconfig config = TBconfig("./config_general.yml");
+
+  TBplotengine plotter = TBplotengine(config.GetConfig()["ModuleConfig"], fRunNum, TButility());
+  plotter.SetCase("single");
+  plotter.SetMethod("IntADC");
+  plotter.SetCID(aCID);
+
+  plotter.init();
 
   TBread<TBwaveform> readerWave = TBread<TBwaveform>(fRunNum, fMaxEvent, fMaxFile, fIsLive, "/Users/khwang/scratch/TB2024/dev_240715/TB2024/sample_data", vecMIDs);
 
@@ -82,7 +124,7 @@ int main(int argc, char *argv[])
         std::chrono::seconds seconds_left = std::chrono::duration_cast<std::chrono::seconds>(time_left - minutes_left);
         std::cout << "\r\033[F" //+ ANSI.HIGHLIGHTED_GREEN + ANSI.BLACK
                   << " " << i << " / " << iMaxEvent << " events  " << minutes_left.count() << ":";
-        printf("%02d left (%.1 f%%) | ", int(seconds_left.count()), percent_done * 100);
+        printf("%02d left (%.1f %%) | ", int(seconds_left.count()), percent_done * 100);
         GetFormattedRamInfo();
 
         std::cout << ANSI.END << std::endl;
@@ -90,8 +132,18 @@ int main(int argc, char *argv[])
 
 
       TBevt<TBwaveform> aEvent;
-      aEvent = readerWave.GetAnEvent();
+      plotter.Fill(readerWave.GetAnEvent());
     }
+    plotter.Update();
+    // gSystem->ProcessEvents();
+    // theApp->Run(true);
+
+    std::string input;
+    std::cout << ANSI.BOLD << "Want to load next file? (y/n): ";
+    std::cin >> input;
+
+    if (!(input == "y" || input == "Y"))
+      break;
   }
 
   return 0;

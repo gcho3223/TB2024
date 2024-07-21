@@ -16,6 +16,11 @@ bool TBcid::operator<(const TBcid &rh) const
   return channel_ < rh.channel();
 }
 
+bool TBcid::operator==(const TBcid &rh) const
+{
+  return (channel_ == rh.channel()) && (mid_ == rh.mid());
+}
+
 void TBcid::print() const
 {
   std::cout << "TBcid::mid()=" << mid_ << " TBcid::channel()=" << channel_ << std::endl;

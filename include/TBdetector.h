@@ -12,6 +12,7 @@ public:
   ~TBcid() {}
 
   bool operator<(const TBcid &rh) const;
+  bool operator==(const TBcid &rh) const;
 
   int mid() const { return mid_; }
   int channel() const { return channel_; }
