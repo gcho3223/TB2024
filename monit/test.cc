@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
   // 3 4 M1-T4-C 1 1 0 0
 
 
-  std::vector<TBcid> aCID = {TBcid(1, 17), TBcid(3,4)};
+  std::vector<TBcid> aCID = {TBcid(1, 17), TBcid(3,4), TBcid(1, 26)};
 
   // std::vector<int> vecMIDs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
   // std::vector<int> vecMIDs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
@@ -138,12 +138,12 @@ int main(int argc, char *argv[])
     // gSystem->ProcessEvents();
     // theApp->Run(true);
 
-    std::string input;
-    std::cout << ANSI.BOLD << "Want to load next file? (y/n): ";
-    std::cin >> input;
+    // std::string input;
+    // std::cout << ANSI.BOLD << "Want to load next file? (y/n): ";
+    // std::cin >> input;
 
-    if (!(input == "y" || input == "Y"))
-      break;
+    // if (!(input == "y" || input == "Y"))
+    //   break;
   }
 
   return 0;

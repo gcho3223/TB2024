@@ -71,6 +71,7 @@ public:
 
   void Draw();
   void Update();
+  void SetMaximum();
 
   void SaveAs(TString output);
 
@@ -113,6 +114,8 @@ private:
   const YAML::Node fConfig;
   int fRunNum;
   TButility fUtility;
+
+  bool fIsFirst;
 
   TApplication* fApp;
   TCanvas* fCanvas;

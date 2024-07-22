@@ -1,5 +1,7 @@
 #include "TBplotengine.h"
 #include "TSystem.h"
+#include "TStyle.h"
+#include "TPaveStats.h"
 
 TBplotengine::TBplotengine(const YAML::Node fConfig_, int fRunNum_, TButility fUtility_)
 : fConfig(fConfig_), fRunNum(fRunNum_), fUtility(fUtility_), fCaseName("")
@@ -8,22 +10,31 @@ TBplotengine::TBplotengine(const YAML::Node fConfig_, int fRunNum_, TButility fU
 void TBplotengine::init()
 {
   fUtility.LoadMapping("../mapping/mapping_TB2024_v1.root");
+  fIsFirst = true;
 
   if (fCaseName == "single") {
-   for (int i = 0; i < fCIDtoPlot.size(); i++) {
+    gStyle->SetPalette(kVisibleSpectrum);
+
+    for (int i = 0; i < fCIDtoPlot.size(); i++) {
       TBcid aCID = fCIDtoPlot.at(i);
       std::string aName =fUtility.GetName(aCID);
       TButility::mod_info aInfo = fUtility.GetInfo(aCID);
+      std::cout << aName << " "; aCID.print();
 
       if (fCalcInfo == TBplotengine::CalcInfo::kIntADC ||fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
         std::vector<int> interval = fConfig[aName].as<std::vector<int>>();
         fPlotter.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, interval.at(0), interval.at(1)));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-          fPlotter.at(i).SetPlot(new TH1D((TString)(aName), ";nBin;IntADC", 220, -3000., 30000.));
+          fPlotter.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 220, -3000., 30000.));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
-          fPlotter.at(i).SetPlot(new TH1D((TString)(aName), ";nBin;PeakADC", 256, 0., 4096.));
+          fPlotter.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 256, 0., 4096.));
+
+        fPlotter.at(i).hist1D->SetLineColor(
+          gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fCIDtoPlot.size() + 1)))
+        );
+        fPlotter.at(i).hist1D->SetLineWidth(2);
 
       } else {
         fPlotter.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo));
@@ -37,9 +48,6 @@ void TBplotengine::init()
     fCanvas = new TCanvas("", "");
 
     Draw();
-
-    for (int i = 0; i < fPlotter.size(); i++)
-      std::cout << fPlotter.at(i).hist1D->GetName() << std::endl;
   }
 
 
@@ -48,9 +56,6 @@ void TBplotengine::init()
 }
 
 double TBplotengine::GetPeakADC(std::vector<short> waveform, int xInit, int xFin) {
-
-  // std::cout << "GetPeakADC" << " " << xInit << " " << xFin << std::endl;
-
   double ped = 0;
   for (int i = 1; i < 101; i++)
     ped += (double)waveform.at(i) / 100.;
@@ -63,9 +68,6 @@ double TBplotengine::GetPeakADC(std::vector<short> waveform, int xInit, int xFin
 }
 
 double TBplotengine::GetIntADC(std::vector<short> waveform, int xInit, int xFin) {
-
-  // std::cout << "GetIntADC" << " " << xInit << " " << xFin << " " << waveform.size() << std::endl;
-
   double ped = 0;
   for (int i = 1; i < 101; i++)
     ped += (double)waveform.at(i) / 100.;
@@ -83,14 +85,9 @@ void TBplotengine::PrintInfo() {
 }
 
 void TBplotengine::Fill(TBevt<TBwaveform> anEvent) {
-
-  // std::cout << "Starting Fill" << std::endl;
-
   for (int i = 0; i < fPlotter.size(); i++) {
     if (fCaseName == "single") {
       double value = GetValue(anEvent.GetData(fPlotter.at(i).cid).waveform(), fPlotter.at(i).xInit, fPlotter.at(i).xFin);
-      // std::cout << fPlotter.at(i).hist1D->GetName() << " " << value << std::endl;
-
       fPlotter.at(i).hist1D->Fill(value);
     }
   }
@@ -101,25 +98,67 @@ void TBplotengine::Draw() {
   fCanvas->cd();
   if (fCaseName == "single") {
     for (int i = 0; i < fPlotter.size(); i++) {
-      std::cout << fPlotter.at(i).hist1D->GetName() << " " <<
-                   fPlotter.at(i).hist1D->GetEntries() <<  " " <<
-                   fPlotter.at(i).hist1D->GetMean() << std::endl;
-
       if (i == 0) fPlotter.at(i).hist1D->Draw("Hist");
       else        fPlotter.at(i).hist1D->Draw("Hist & same");
-
     }
   }
+
   gSystem->ProcessEvents();
   gSystem->Sleep(3000);
-
 }
 
 void TBplotengine::Update() {
 
+  SetMaximum();
+
+
+  if (fCaseName == "single") {
+    if (fIsFirst) {
+      fIsFirst = false;
+
+      for (int i = 0; i < fPlotter.size(); i++) {
+
+        if (i == 0) fPlotter.at(i).hist1D->Draw("Hist");
+        else        fPlotter.at(i).hist1D->Draw("Hist & sames");
+
+        fCanvas->Update();
+        // TPaveStats* stat = (TPaveStats*)fCanvas->GetPrimitive("stats");
+        TPaveStats* stat = (TPaveStats*)fPlotter.at(i).hist1D->FindObject("stats");
+        // stat->SetName(fPlotter.at(i).hist1D->GetName() + (TString)"_stat");
+        stat->SetTextColor(fPlotter.at(i).hist1D->GetLineColor());
+        stat->SetY2NDC(1. - 0.2 * i);
+        stat->SetY1NDC(.8 - 0.2 * i);
+        stat->SaveStyle();
+      }
+    } else {
+      for (int i = 0; i < fPlotter.size(); i++) {
+        if (i == 0) fPlotter.at(i).hist1D->Draw("Hist");
+        else        fPlotter.at(i).hist1D->Draw("Hist & sames");
+      }
+    }
+  }
+
   fCanvas->Update();
   fCanvas->Pad()->Draw();
   gSystem->ProcessEvents();
+  gSystem->Sleep(5000);
+
+}
+
+void TBplotengine::SetMaximum() {
+
+  float max = -999;
+  for (int i = 0; i < fPlotter.size(); i++) {
+    if (max < fPlotter.at(i).hist1D->GetMaximum()) {
+      max = fPlotter.at(i).hist1D->GetMaximum();
+    }
+    // std::cout << fPlotter.at(i).hist1D->GetName() << " " << fPlotter.at(i).hist1D->GetMaximum() << std::endl;
+  }
+
+  // std::cout << "TBplotengine::SetMaximum() : " << max << std::endl;
+
+  for (int i = 0; i < fPlotter.size(); i++)
+    fPlotter.at(i).hist1D->GetYaxis()->SetRangeUser(0., max * 1.2);
 }
 
 void TBplotengine::SaveAs(TString output)
