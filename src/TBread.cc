@@ -25,6 +25,7 @@ template <typename T>
 void FileController<T>::init()
 {
 
+  fMaxFileNum = 999;
   for (int i = 0; i < fMaxFileNum; i++)
   {
     std::string aFileName = GetFileName(fMode, i);
@@ -33,14 +34,14 @@ void FileController<T>::init()
     {
       int maxEvent = GetMaximum(fMode, aFileName);
       fTotalMaxEventNum += maxEvent;
-      // std::cout << "file scanning : " << aFileName << " - Max Event : " << maxEvent << " / " << fTotalMaxEventNum << std::endl;
+      std::cout << "file scanning : " << aFileName << " - Max Event : " << maxEvent << " / " << fTotalMaxEventNum << std::endl;
     }
     else
     {
       break;
     }
   }
-
+  std::cout << " " << std::endl;
   OpenFile();
 }
 
@@ -81,7 +82,8 @@ void FileController<T>::OpenFile()
 
   fNextFileNum++;
 
-  std::cout << ANSI.BOLD + "File scanning : " + ANSI.END << ANSI.GREEN + ANSI.BOLD + fFileName + ANSI.END << " - Current : " << fCurrentEventNum << " / " << fTotalEventNum << " - Max Event : " << fCurrentMaxEventNum << " / " << fTotalMaxEventNum << std::endl;
+  if (fIsLive)
+    std::cout << ANSI.BOLD + "File scanning : " + ANSI.END << ANSI.GREEN + ANSI.BOLD + fFileName + ANSI.END << " - Current : " << fCurrentEventNum << " / " << fTotalEventNum << " - Max Event : " << fCurrentMaxEventNum << " / " << fTotalMaxEventNum << std::endl;
 }
 
 template <typename T>
