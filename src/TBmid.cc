@@ -25,6 +25,24 @@ std::vector<float> TBwaveform::pedcorrectedWaveform(float ped) const
   return std::move(result);
 }
 
+std::vector<float> TBwaveform::pedcorrectedWaveform() const
+{
+  std::vector<float> result;
+  result.reserve(waveform_.size());
+
+  float ped = 0;
+  for (int i = 1; i < 101; i++)
+    ped += static_cast<float>(waveform_.at(i)) / 100.;
+
+  for (unsigned idx = 0; idx < waveform_.size(); idx++)
+  {
+    float abin = ped - static_cast<float>(waveform_.at(idx));
+    result.emplace_back(abin);
+  }
+
+  return std::move(result);
+}
+
 float TBwaveform::pedcorrectedADC(float ped, int buffer) const
 {
   auto corrected = pedcorrectedWaveform(ped);

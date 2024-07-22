@@ -19,6 +19,7 @@ public:
   std::vector<short> waveform() const { return waveform_; }
 
   std::vector<float> pedcorrectedWaveform(float ped) const;
+  std::vector<float> pedcorrectedWaveform() const;
   float pedcorrectedADC(float ped, int buffer = 24) const;
   float emulfastADC(int rise, int width, int buffer = 24) const;
 
