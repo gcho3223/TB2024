@@ -1,3 +1,5 @@
+BaseDirectory: "/Users/khwang/scratch/TB2024/dev_240715/TB2024/sample_data"
+Mapping: "../mapping/mapping_TB2024_v1.root"
 ModuleConfig:
     M10-T1-S: [100, 200]
     M10-T2-S: [100, 200]

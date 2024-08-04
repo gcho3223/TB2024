@@ -24,11 +24,13 @@
 #include "TFile.h"
 #include "TCanvas.h"
 #include "TApplication.h"
+#include "TLegend.h"
 
 class TBplotengine
 {
 public:
-  TBplotengine(const YAML::Node fNodePlot_, int fRunNum_, TButility fUtility_);
+  TBplotengine() = default;
+  TBplotengine(const YAML::Node fNodePlot_, int fRunNum_, bool fLive_, TButility fUtility_);
   ~TBplotengine() {}
 
   enum CalcInfo
@@ -64,6 +66,9 @@ public:
   };
 
   void init();
+  void init_2D();
+  void init_MCPPMT();
+  void init_SiPM();
   void PrintInfo();
 
   void Fill(TBevt<TBwaveform> anEvent);
@@ -89,9 +94,12 @@ public:
     return -999;
   }
 
-  void SetCID(std::vector<TBcid> cids) { fCIDtoPlot = cids; }
+  std::vector<int> GetUniqueMID();
+
+  void SetCID(std::vector<TBcid> cids) { fCIDtoPlot_Ceren = cids; }
   // void SetCID(std::string cases) { SetCID(fUtility.loadCID(cases)); }
   void SetCase(std::string cases) { fCaseName = cases; }
+  void SetModule(std::string module) { fModule = module; }
 
   void SetMethod(std::string fMethod) {
     if (fMethod == "IntADC")
@@ -100,13 +108,13 @@ public:
     if (fMethod == "PeakADC")
       fCalcInfo = kPeakADC;
 
-    if (fMethod == "avg")
+    if (fMethod == "Avg")
       fCalcInfo = kAvgTimeStruc;
 
-    if (fMethod == "overlay")
+    if (fMethod == "Overlay")
       fCalcInfo = kOverlay;
 
-    if (fMethod == "aux")
+    if (fMethod == "AUX")
       fCalcInfo = kAux;
   }
 
@@ -116,19 +124,25 @@ private:
   TButility fUtility;
 
   bool fIsFirst;
+  bool fLive;
 
   TApplication* fApp;
   TCanvas* fCanvas;
+  TLegend* fLeg;
 
   CalcInfo fCalcInfo;
 
   std::string fCaseName;
   std::string fModule;
 
+  TH2D* f2DHistCeren;
+  TH2D* f2DHistScint;
 
-  std::vector<TBcid> fCIDtoPlot;
+  std::vector<TBcid> fCIDtoPlot_Ceren;
+  std::vector<TBcid> fCIDtoPlot_Scint;
 
-  std::vector<PlotInfo> fPlotter;
+  std::vector<PlotInfo> fPlotter_Ceren;
+  std::vector<PlotInfo> fPlotter_Scint;
 
 };
 

@@ -17,36 +17,45 @@ void TButility::LoadMapping(const std::string &path)
 
   std::cout << "Loading mapping file : " << path << std::endl;
 
-  TChain *mapChain = new TChain("mapping");
-  mapChain->Add((TString)path);
+  TChain *mapChain_DAQ = new TChain("mapping_DAQ");
+  mapChain_DAQ->Add((TString)path);
 
-  mapChain->SetBranchAddress("mid", &mid);
-  mapChain->SetBranchAddress("ch", &ch);
-  mapChain->SetBranchAddress("cases", &cases);
-  mapChain->SetBranchAddress("name", &name);
-  mapChain->SetBranchAddress("isCeren", &isCeren);
-  mapChain->SetBranchAddress("row", &row);
-  mapChain->SetBranchAddress("column", &column);
+  mapChain_DAQ->SetBranchAddress("mid", &mid);
+  mapChain_DAQ->SetBranchAddress("ch", &ch);
+  mapChain_DAQ->SetBranchAddress("name", &name);
 
-  for (int i = 0; i < mapChain->GetEntries(); i++) {
-    mapChain->GetEntry(i);
+  for (int i = 0; i < mapChain_DAQ->GetEntries(); i++) {
+    mapChain_DAQ->GetEntry(i);
 
     if (*name == "null")
       continue;
 
     TBcid aCID = TBcid(mid, ch);
     mapping_CID_NAME.insert(std::make_pair(aCID, *name));
-    mapping_CID_INFO.insert(std::make_pair(aCID, mod_info(cases, isCeren, row, column)));
     mapping_NAME_CID.insert(std::make_pair(*name, aCID));
   }
 
-  // for (auto aMap : mapping_CID_NAME)
-  //   std::cout << aMap.first.mid() << " " << aMap.first.channel() << " " << aMap.second << std::endl;
+  TChain *mapChain_DQM = new TChain("mapping_DQM");
+  mapChain_DQM->Add((TString)path);
 
-  // for (auto aMap : mapping_NAME_CID)
-  //   std::cout << aMap.first << " " << aMap.second.mid() << " " << aMap.second.channel() << std::endl;
+  mapChain_DQM->SetBranchAddress("name", &name);
+  mapChain_DQM->SetBranchAddress("cases", &cases);
+  mapChain_DQM->SetBranchAddress("isCeren", &isCeren);
+  mapChain_DQM->SetBranchAddress("row", &row);
+  mapChain_DQM->SetBranchAddress("column", &column);
 
-  delete mapChain;
+  for (int i = 0; i < mapChain_DQM->GetEntries(); i++) {
+    mapChain_DQM->GetEntry(i);
+
+    if (*name == "null")
+      continue;
+
+    mapping_NAME_INFO.insert(std::make_pair(*name, mod_info(cases, isCeren, row, column)));
+    mapping_CID_INFO.insert(std::make_pair(GetCID(*name), mod_info(cases, isCeren, row, column)));
+  }
+
+  delete mapChain_DAQ;
+  delete mapChain_DQM;
 }
 
 TBcid TButility::GetCID(TString name) const {
@@ -70,4 +79,39 @@ TButility::mod_info TButility::GetInfo(TString name) const {
     return mod_info(-1, -1, -1, -1);
 
   return GetInfo(aCID);
+}
+
+std::vector<int> TButility::GetUniqueMID(std::vector<TBcid> aCID) {
+  std::vector<int> return_vec;
+  std::map<int, int> aMap;
+
+  for (int i = 0; i < aCID.size(); i++) {
+    if (aMap.find(aCID.at(i).mid()) == aMap.end()) {
+      return_vec.push_back(aCID.at(i).mid());
+      aMap.insert(std::make_pair(aCID.at(i).mid(), 1));
+    }
+  }
+
+  return return_vec;
+}
+
+std::vector<int> TButility::GetUniqueMID(std::vector<TBcid> aCID_1, std::vector<TBcid> aCID_2) {
+  std::vector<int> return_vec;
+  std::map<int, int> aMap;
+
+  for (int i = 0; i < aCID_1.size(); i++) {
+    if (aMap.find(aCID_1.at(i).mid()) == aMap.end()) {
+      return_vec.push_back(aCID_1.at(i).mid());
+      aMap.insert(std::make_pair(aCID_1.at(i).mid(), 1));
+    }
+  }
+
+  for (int i = 0; i < aCID_2.size(); i++) {
+    if (aMap.find(aCID_2.at(i).mid()) == aMap.end()) {
+      return_vec.push_back(aCID_2.at(i).mid());
+      aMap.insert(std::make_pair(aCID_2.at(i).mid(), 1));
+    }
+  }
+
+  return return_vec;
 }

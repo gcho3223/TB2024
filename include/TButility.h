@@ -17,6 +17,9 @@ class TButility
 {
 public:
   TButility() {}
+  TButility(std::string fMapping_) {
+    LoadMapping(fMapping_);
+  }
   ~TButility() {}
 
   struct mod_info {
@@ -37,24 +40,14 @@ public:
   mod_info GetInfo(TBcid cid) const;
   mod_info GetInfo(TString name) const;
 
-  std::vector<int> GetUniqueMID(std::vector<TBcid> aCID) {
-    std::vector<int> return_vec;
-    std::map<int, int> aMap;
-
-    for (int i = 0; i < aCID.size(); i++) {
-      if (aMap.find(aCID.at(i).mid()) == aMap.end()) {
-        return_vec.push_back(aCID.at(i).mid());
-        aMap.insert(std::make_pair(aCID.at(i).mid(), 1));
-      }
-    }
-
-    return return_vec;
-  }
+  std::vector<int> GetUniqueMID(std::vector<TBcid> aCID);
+  std::vector<int> GetUniqueMID(std::vector<TBcid> aCID_1, std::vector<TBcid> aCID_2);
 
 private:
   std::map<TBcid, std::string> mapping_CID_NAME;
   std::map<TBcid, mod_info> mapping_CID_INFO;
   std::map<TString, TBcid> mapping_NAME_CID;
+  std::map<TString, mod_info> mapping_NAME_INFO;
 
 };
 
