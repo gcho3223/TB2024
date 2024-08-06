@@ -125,29 +125,20 @@ void TBmonit<T>::LoopLive() {
     fPlotter.SetMethod(aMethod);
   }
 
-  if (aCase == "single") {
-    std::vector<std::string> aModules = {};
-    fObj->GetVector("module", &aModules);
+  std::vector<std::string> aModules = {};
+  fObj->GetVector("module", &aModules);
+  // std::cout << "std::vector<std::string> aModules " << aModules.size() << " " << aModules.at(0) << std::endl;
 
-    if (aModules.size() == 0) {
-      // !throw exception
-    } else {
-      std::vector<TBcid> aCID;
-      for (int i = 0; i < aModules.size(); i++)
-        aCID.push_back(fUtility.GetCID(aModules.at(i)));
+  if (aModules.size() == 1 && (aCase == "heatmap" || aCase == "module")) {
+    fPlotter.SetModule(aModules.at(0));
+  } else if (aCase == "single") {
+    std::vector<TBcid> aCID;
+    for (int i = 0; i < aModules.size(); i++)
+      aCID.push_back(fUtility.GetCID(aModules.at(i)));
 
-      fPlotter.SetCID(aCID);
-    }
-  }
-
-  if (aCase == "heatmap") {
-    std::string aModules = "";
-    fObj->GetVariable("module", &aModules);
-    if (aModules == "null") {
-      // !throw exception
-    } else {
-      fPlotter.SetModule(aModules);
-    }
+    fPlotter.SetCID(aCID);
+  } else {
+    // !throw exception
   }
 
   fPlotter.init();
@@ -188,7 +179,6 @@ void TBmonit<T>::LoopLive() {
           std::cout << ANSI.END << std::endl;
         }
 
-        TBevt<TBwaveform> aEvent;
         fPlotter.Fill(readerWave.GetAnEvent());
       }
       fPlotter.Update();
@@ -204,7 +194,7 @@ void TBmonit<T>::LoopAfterRun() {
   TBplotengine fPlotter = TBplotengine(fConfig.GetConfig()["ModuleConfig"], fRunNum, fIsLive, fUtility);
 
   std::string aCase;
-  fObj->GetVariable("type", &aCase); //'single', 'heatmap'
+  fObj->GetVariable("type", &aCase); //'single', 'heatmap', 'module'
   if (aCase == "null") {
     // !thow exception
   } else {
@@ -219,29 +209,20 @@ void TBmonit<T>::LoopAfterRun() {
     fPlotter.SetMethod(aMethod);
   }
 
-  if (aCase == "single") {
-    std::vector<std::string> aModules = {};
-    fObj->GetVector("module", &aModules);
+  std::vector<std::string> aModules = {};
+  fObj->GetVector("module", &aModules);
 
-    if (aModules.size() == 0) {
-      // !throw exception
-    } else {
-      std::vector<TBcid> aCID;
-      for (int i = 0; i < aModules.size(); i++)
-        aCID.push_back(fUtility.GetCID(aModules.at(i)));
+  // std::cout << "std::vector<std::string> aModules " << aModules.size() << " " << aModules.at(0) << std::endl;
+  if (aModules.size() == 1 && (aCase == "heatmap" || aCase == "module")) {
+    fPlotter.SetModule(aModules.at(0));
+  } else if (aCase == "single") {
+    std::vector<TBcid> aCID;
+    for (int i = 0; i < aModules.size(); i++)
+      aCID.push_back(fUtility.GetCID(aModules.at(i)));
 
-      fPlotter.SetCID(aCID);
-    }
-  }
-
-  if (aCase == "heatmap") {
-    std::string aModules = "";
-    fObj->GetVariable("module", &aModules);
-    if (aModules == "null") {
-      // !throw exception
-    } else {
-      fPlotter.SetModule(aModules);
-    }
+    fPlotter.SetCID(aCID);
+  } else {
+    // !throw exception
   }
 
   fPlotter.init();

@@ -102,7 +102,9 @@ public:
   void SetCase(std::string cases) { fCaseName = cases; }
   void SetModule(std::string module) { fModule = module; }
 
-  void SetMethod(std::string fMethod) {
+  void SetMethod(std::string fMethod_) {
+    fMethod = fMethod_;
+
     if (fMethod == "IntADC")
       fCalcInfo = kIntADC;
 
@@ -135,6 +137,7 @@ private:
 
   std::string fCaseName;
   std::string fModule;
+  std::string fMethod;
 
   TH2D* f2DHistCeren;
   TH2D* f2DHistScint;

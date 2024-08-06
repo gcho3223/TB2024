@@ -75,21 +75,21 @@ void TBplotengine::init() {
       fApp->SetReturnFromRun(true);
 
     if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
-      fMainFrame = new TH1D("frame", ";Bin;ADC", 1, 0., 1000.);
+      fMainFrame = new TH1D("frame", ";Bin;ADC", 1000, 0.5, 1000.5);
       fMainFrame->SetStats(0);
     }
 
     if (fCalcInfo == TBplotengine::CalcInfo::kIntADC) {
-      fMainFrame = new TH1D("frame", ";IntADC;nEvents", 1, -3000., 30000.);
+      fMainFrame = new TH1D("frame", ";IntADC;nEvents", 220, -3000., 30000.);
       fMainFrame->SetStats(0);
     }
 
     if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
-      fMainFrame = new TH1D("frame", ";PeakADC;nEvents", 1, -512., 4096.);
+      fMainFrame = new TH1D("frame", ";PeakADC;nEvents", 288, -512., 4096.);
       fMainFrame->SetStats(0);
     }
 
-    fCanvas = new TCanvas("", "");
+    fCanvas = new TCanvas("", "", 1500, 1000);
 
     Draw();
   } else if (fCaseName == "heatmap") {
@@ -115,7 +115,10 @@ void TBplotengine::init() {
       fApp->SetReturnFromRun(true);
 
     fCanvas = new TCanvas("", "", 1000, 1000);
-    fCanvas->Divide(2, 2);
+    if (fModule == "M11") fCanvas->Divide(3, 3);
+    else                  fCanvas->Divide(2, 2);
+
+    // std::cout << "fModule: " << fModule << std::endl;
 
     init_single_module();
   }
@@ -134,25 +137,97 @@ void TBplotengine::init() {
 }
 
 void TBplotengine::init_single_module() {
-  if (fModule == "M1")
 
-  for (int i = 1; i <= 4; i++) {
-    std::string aCName = fModule + "-T" + std::to_string(i) + "-C";
-    TBcid aCCID = fUtility.GetCID(aCName);
-    TButility::mod_info aCInfo = fUtility.GetInfo(aCCID);
+  // std::cout << "TBplotengine::init_single_module()" << " " << fModule << std::endl;
 
-    fCIDtoPlot_Ceren.push_back(aCCID);
-    std::vector<int> aCinterval = fConfig[aCName].as<std::vector<int>>();
-    fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCCID, aCName, aCInfo, aCinterval.at(0), aCinterval.at(1)));
+  if (fModule != "M11") {
+    for (int i = 1; i <= 4; i++) {
+      std::string aCName = fModule + "-T" + std::to_string(i) + "-C";
+      TBcid aCCID = fUtility.GetCID(aCName);
+      TButility::mod_info aCInfo = fUtility.GetInfo(aCCID);
 
-    std::string aSName = fModule + "-T" + std::to_string(i) + "-C";
-    TBcid aSCID = fUtility.GetCID(aSName);
-    TButility::mod_info aSInfo = fUtility.GetInfo(aSCID);
+      fCIDtoPlot_Ceren.push_back(aCCID);
+      std::vector<int> aCinterval = fConfig[aCName].as<std::vector<int>>();
+      fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCCID, aCName, aCInfo, aCinterval.at(0), aCinterval.at(1)));
 
-    fCIDtoPlot_Scint.push_back(aSCID);
-    std::vector<int> aSinterval = fConfig[aSName].as<std::vector<int>>();
-    fPlotter_Scint.push_back(TBplotengine::PlotInfo(aSCID, aSName, aSInfo, aSinterval.at(0), aSinterval.at(1)));
+      if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
+        fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";IntADC;nEvents", 220, -3000., 30000.));
+
+      if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
+        fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";PeakADC;nEvents", 288, -512., 4096.));
+
+      std::string aSName = fModule + "-T" + std::to_string(i) + "-S";
+      TBcid aSCID = fUtility.GetCID(aSName);
+      TButility::mod_info aSInfo = fUtility.GetInfo(aSCID);
+
+      fCIDtoPlot_Scint.push_back(aSCID);
+      std::vector<int> aSinterval = fConfig[aSName].as<std::vector<int>>();
+      fPlotter_Scint.push_back(TBplotengine::PlotInfo(aSCID, aSName, aSInfo, aSinterval.at(0), aSinterval.at(1)));
+
+      if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
+        fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";IntADC;nEvents", 220, -3000., 30000.));
+
+      if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
+        fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";PeakADC;nEvents", 288, -512., 4096.));
+    }
+  } else {
+    for (int i = 1; i <= 9; i++) {
+      if (i == 5 ) {
+
+        fPlotter_Ceren.push_back(TBplotengine::PlotInfo(TBcid(-1, -1), "M11-T5-C", TButility::mod_info(-1, -1, -1, -1), -1, -1));
+        fPlotter_Scint.push_back(TBplotengine::PlotInfo(TBcid(-1, -1), "M11-T5-S", TButility::mod_info(-1, -1, -1, -1), -1, -1));
+      } else {
+
+        std::string aCName = fModule + "-T" + std::to_string(i) + "-C";
+        TBcid aCCID = fUtility.GetCID(aCName);
+        TButility::mod_info aCInfo = fUtility.GetInfo(aCCID);
+
+        fCIDtoPlot_Ceren.push_back(aCCID);
+        std::vector<int> aCinterval = fConfig[aCName].as<std::vector<int>>();
+        fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCCID, aCName, aCInfo, aCinterval.at(0), aCinterval.at(1)));
+
+        if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
+          fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";IntADC;nEvents", 220, -3000., 30000.));
+
+        if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
+          fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";PeakADC;nEvents", 288, -512., 4096.));
+
+        fPlotter_Ceren.at(i - 1).hist1D->SetLineWidth(2);
+        fPlotter_Ceren.at(i - 1).hist1D->SetLineColor(kBlue);
+
+        std::string aSName = fModule + "-T" + std::to_string(i) + "-S";
+        TBcid aSCID = fUtility.GetCID(aSName);
+        TButility::mod_info aSInfo = fUtility.GetInfo(aSCID);
+
+        fCIDtoPlot_Scint.push_back(aSCID);
+        std::vector<int> aSinterval = fConfig[aSName].as<std::vector<int>>();
+        fPlotter_Scint.push_back(TBplotengine::PlotInfo(aSCID, aSName, aSInfo, aSinterval.at(0), aSinterval.at(1)));
+
+        if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
+          fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";IntADC;nEvents", 220, -3000., 30000.));
+
+        if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
+          fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";PeakADC;nEvents", 288, -512., 4096.));
+
+        fPlotter_Scint.at(i - 1).hist1D->SetLineWidth(2);
+        fPlotter_Scint.at(i - 1).hist1D->SetLineColor(kRed);
+      }
+    }
   }
+
+  // std::cout << fCIDtoPlot_Ceren.size() << std::endl;
+  // for (int i = 0; i < fPlotter_Ceren.size(); i++) {
+  //   std::cout << i << " " << fPlotter_Ceren.at(i).name << " " << fPlotter_Ceren.at(i).info.row << " " << fPlotter_Ceren.at(i).info.col << " ";
+  //   fPlotter_Ceren.at(i).cid.print();
+  // }
+
+  // std::cout << fCIDtoPlot_Scint.size() << std::endl;
+  // for (int i = 0; i < fPlotter_Scint.size(); i++) {
+  //   std::cout << i << " " << fPlotter_Scint.at(i).name << " " << fPlotter_Scint.at(i).info.row << " " << fPlotter_Scint.at(i).info.col << " ";
+  //   fPlotter_Scint.at(i).cid.print();
+  // }
+
+  Draw();
 }
 
 void TBplotengine::init_2D() {
@@ -362,6 +437,19 @@ void TBplotengine::Fill(TBevt<TBwaveform> anEvent) {
       double value = GetValue(anEvent.GetData(fPlotter_Scint.at(i).cid).waveform(), fPlotter_Scint.at(i).xInit, fPlotter_Scint.at(i).xFin);
       fPlotter_Scint.at(i).hist1D->Fill(value);
     }
+  } else if (fCaseName == "module") {
+
+    for (int i = 0; i < fPlotter_Ceren.size(); i++) {
+      if (i == 4) continue;
+      double value = GetValue(anEvent.GetData(fPlotter_Ceren.at(i).cid).waveform(), fPlotter_Ceren.at(i).xInit, fPlotter_Ceren.at(i).xFin);
+      fPlotter_Ceren.at(i).hist1D->Fill(value);
+    }
+
+    for (int i = 0; i < fPlotter_Scint.size(); i++) {
+      if (i == 4) continue;
+      double value = GetValue(anEvent.GetData(fPlotter_Scint.at(i).cid).waveform(), fPlotter_Scint.at(i).xInit, fPlotter_Scint.at(i).xFin);
+      fPlotter_Scint.at(i).hist1D->Fill(value);
+    }
   }
 }
 
@@ -393,6 +481,15 @@ void TBplotengine::Draw() {
 
     fCanvas->cd(2);
     f2DHistScint->Draw("colz text");
+  } else if (fCaseName == "module") {
+
+    for (int i = 0; i < fPlotter_Ceren.size(); i++) {
+      if (i == 4) continue;
+
+      fCanvas->cd(i + 1);
+      fPlotter_Ceren.at(i).hist1D->Draw("Hist");
+      fPlotter_Scint.at(i).hist1D->Draw("Hist & sames");
+    }
   }
 
   gSystem->ProcessEvents();
@@ -416,6 +513,8 @@ void TBplotengine::Update() {
 
       } else {
         fMainFrame->Draw();
+
+        double stat_height = (1. - 0.2) / (double)fPlotter_Ceren.size();
         for (int i = 0; i < fPlotter_Ceren.size(); i++) {
 
           fPlotter_Ceren.at(i).hist1D->Draw("Hist & sames");
@@ -426,14 +525,16 @@ void TBplotengine::Update() {
             TPaveStats* stat = (TPaveStats*)fPlotter_Ceren.at(i).hist1D->FindObject("stats");
             // stat->SetName(fPlotter_Ceren.at(i).hist1D->GetName() + (TString)"_stat");
             stat->SetTextColor(fPlotter_Ceren.at(i).hist1D->GetLineColor());
-            stat->SetY2NDC(1. - 0.2 * i);
-            stat->SetY1NDC(.8 - 0.2 * i);
+            stat->SetY2NDC(1. - stat_height * i);
+            stat->SetY1NDC(1 - stat_height * (i + 1));
             stat->SaveStyle();
           }
         }
-        if ((fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) && fPlotter_Ceren.size() >5)
-          fLeg->Draw("same");
-        else if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
+
+        // if ((fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) && fPlotter_Ceren.size() >5)
+        //   fLeg->Draw("same");
+
+        if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
           fLeg->Draw("same");
       }
     }
@@ -445,12 +546,70 @@ void TBplotengine::Update() {
     for (int i = 0; i < fPlotter_Scint.size(); i++)
       f2DHistScint->SetBinContent(fPlotter_Scint.at(i).info.row, fPlotter_Scint.at(i).info.col, fPlotter_Scint.at(i).hist1D->GetMean());
 
+  } else if (fCaseName == "module") {
+
+    for (int i = 0; i < fPlotter_Ceren.size(); i++) {
+      if (i == 4) continue;
+
+      if (fPlotter_Ceren.at(i).hist1D->GetMaximum() > fPlotter_Ceren.at(i).hist1D->GetMaximum()) {
+
+        fCanvas->cd(i + 1);
+        fPlotter_Ceren.at(i).hist1D->Draw("Hist");
+
+        if (fIsFirst) {
+          fCanvas->Update();
+          TPaveStats* stat_c = (TPaveStats*)fPlotter_Ceren.at(i).hist1D->FindObject("stats");
+          stat_c->SetTextColor(4);
+          stat_c->SetY2NDC(1.);
+          stat_c->SetY1NDC(.8);
+          stat_c->SaveStyle();
+        }
+
+        fCanvas->cd(i + 1);
+        fPlotter_Scint.at(i).hist1D->Draw("Hist & sames");
+
+        if (fIsFirst) {
+          fCanvas->Update();
+          TPaveStats* stat_s = (TPaveStats*)fPlotter_Scint.at(i).hist1D->FindObject("stats");
+          stat_s->SetTextColor(2);
+          stat_s->SetY2NDC(.8);
+          stat_s->SetY1NDC(.6);
+          stat_s->SaveStyle();
+        }
+      } else {
+
+        fCanvas->cd(i + 1);
+        fPlotter_Scint.at(i).hist1D->Draw("Hist");
+
+        if (fIsFirst) {
+          fCanvas->Update();
+          TPaveStats* stat_s = (TPaveStats*)fPlotter_Scint.at(i).hist1D->FindObject("stats");
+          stat_s->SetTextColor(2);
+          stat_s->SetY2NDC(.8);
+          stat_s->SetY1NDC(.6);
+          stat_s->SaveStyle();
+        }
+
+        fCanvas->cd(i + 1);
+        fPlotter_Ceren.at(i).hist1D->Draw("Hist & sames");
+
+        if (fIsFirst) {
+          fCanvas->Update();
+          TPaveStats* stat_c = (TPaveStats*)fPlotter_Ceren.at(i).hist1D->FindObject("stats");
+          stat_c->SetTextColor(4);
+          stat_c->SetY2NDC(1.);
+          stat_c->SetY1NDC(.8);
+          stat_c->SaveStyle();
+        }
+      }
+    }
+
+    fIsFirst = false;
   }
 
+  SaveAs("");
   fCanvas->Update();
   fCanvas->Pad()->Draw();
-
-  // gSystem->ProcessEvents();
 
   if (!fLive) {
     fApp->Run(true);
@@ -458,12 +617,13 @@ void TBplotengine::Update() {
     gSystem->ProcessEvents();
   }
 
+  gSystem->Sleep(5000);
+
   if (fLive)
     if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
       for (int i = 0; i < fPlotter_Ceren.size(); i++)
         fPlotter_Ceren.at(i).hist1D->Scale((float)fPlotter_Ceren.at(i).xInit);
 
-  gSystem->Sleep(5000);
 
 }
 
@@ -485,21 +645,37 @@ void TBplotengine::SetMaximum() {
 void TBplotengine::SaveAs(TString output = "")
 {
   if (output == "")
-    output = std::to_string(fRunNum) + "_DQMoutput.root";
-
-  // output = (TString)("./ROOT/"+ output);
-  // if (fCaseName != "")
-  //   output = (TString)(output + "_" + fCaseName);
+    output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + "_" + fModule + ".root";
 
   TFile* outoutFile = new TFile(output, "RECREATE");
 
   outoutFile->cd();
+  if (fCaseName == "single") {
+    for (int i = 0; i < fPlotter_Ceren.size(); i++)
+      fPlotter_Ceren.at(i).hist1D->Write();
 
-  for (int i = 0; i < fPlotter_Ceren.size(); i++)
-    fPlotter_Ceren.at(i).hist1D->Write();
+  } else if (fCaseName == "heatmap") {
+    f2DHistCeren->Write();
+    f2DHistScint->Write();
 
-  for (int i = 0; i < fPlotter_Scint.size(); i++)
-    fPlotter_Scint.at(i).hist1D->Write();
+    for (int i = 0; i < fPlotter_Ceren.size(); i++)
+      fPlotter_Ceren.at(i).hist1D->Write();
+
+    for (int i = 0; i < fPlotter_Scint.size(); i++)
+      fPlotter_Scint.at(i).hist1D->Write();
+
+  } else if (fCaseName == "module") {
+
+    for (int i = 0; i < fPlotter_Ceren.size(); i++) {
+      if (i == 4) continue;
+      fPlotter_Ceren.at(i).hist1D->Write();
+    }
+
+    for (int i = 0; i < fPlotter_Scint.size(); i++) {
+      if (i == 4) continue;
+      fPlotter_Scint.at(i).hist1D->Write();
+    }
+  }
 
   outoutFile->Close();
 }
@@ -508,7 +684,7 @@ std::vector<int> TBplotengine::GetUniqueMID() {
   if (fCaseName == "single") {
 
     return fUtility.GetUniqueMID(fCIDtoPlot_Ceren);
-  } else if (fCaseName == "heatmap") {
+  } else if (fCaseName == "heatmap" || fCaseName == "module") {
 
     return fUtility.GetUniqueMID(fCIDtoPlot_Ceren, fCIDtoPlot_Scint);
   }

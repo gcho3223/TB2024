@@ -86,6 +86,7 @@ std::vector<int> TButility::GetUniqueMID(std::vector<TBcid> aCID) {
   std::map<int, int> aMap;
 
   for (int i = 0; i < aCID.size(); i++) {
+    if (aCID.at(i).mid() == -1) continue;
     if (aMap.find(aCID.at(i).mid()) == aMap.end()) {
       return_vec.push_back(aCID.at(i).mid());
       aMap.insert(std::make_pair(aCID.at(i).mid(), 1));
@@ -100,6 +101,7 @@ std::vector<int> TButility::GetUniqueMID(std::vector<TBcid> aCID_1, std::vector<
   std::map<int, int> aMap;
 
   for (int i = 0; i < aCID_1.size(); i++) {
+    if (aCID_1.at(i).mid() == -1) continue;
     if (aMap.find(aCID_1.at(i).mid()) == aMap.end()) {
       return_vec.push_back(aCID_1.at(i).mid());
       aMap.insert(std::make_pair(aCID_1.at(i).mid(), 1));
@@ -107,6 +109,7 @@ std::vector<int> TButility::GetUniqueMID(std::vector<TBcid> aCID_1, std::vector<
   }
 
   for (int i = 0; i < aCID_2.size(); i++) {
+    if (aCID_2.at(i).mid() == -1) continue;
     if (aMap.find(aCID_2.at(i).mid()) == aMap.end()) {
       return_vec.push_back(aCID_2.at(i).mid());
       aMap.insert(std::make_pair(aCID_2.at(i).mid(), 1));

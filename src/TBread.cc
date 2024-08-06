@@ -84,8 +84,8 @@ void FileController<T>::OpenFile()
 
   fNextFileNum++;
 
-  // if (fIsLive)
-  //   std::cout << ANSI.BOLD + "File scanning : " + ANSI.END << ANSI.GREEN + ANSI.BOLD + fFileName + ANSI.END << " - Current : " << fCurrentEventNum << " / " << fTotalEventNum << " - Max Event : " << fCurrentMaxEventNum << " / " << fTotalMaxEventNum << std::endl;
+  if (fIsLive)
+    std::cout << ANSI.BOLD + "File scanning : " + ANSI.END << ANSI.GREEN + ANSI.BOLD + fFileName + ANSI.END << " - Current : " << fCurrentEventNum << " / " << fTotalEventNum << " - Max Event : " << fCurrentMaxEventNum << " / " << fTotalMaxEventNum << std::endl;
 }
 
 template <typename T>
