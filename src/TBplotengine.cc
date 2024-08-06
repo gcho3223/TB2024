@@ -15,11 +15,16 @@ void TBplotengine::init() {
 
   if (fCaseName == "single") {
 
-    if (fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
+    if (fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
       if (fCIDtoPlot_Ceren.size() > 5)
         fLeg = new TLegend(0.7, 0.2, 0.9, 0.5);
-    else if(fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
+
+    } else if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
       fLeg = new TLegend(0.7, 0.2, 0.9, 0.5);
+     	fLeg->SetFillStyle(0);
+     	fLeg->SetBorderSize(0);
+     	fLeg->SetTextFont(42);
+    }
 
     gStyle->SetPalette(kVisibleSpectrum);
 
@@ -46,7 +51,7 @@ void TBplotengine::init() {
 
       } else if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
         fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, 0, 0));
-        fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";Bin;ADC", 1024, 0., 1024.));
+        fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";Bin;ADC", 1000, 0.5, 1000.5));
         fPlotter_Ceren.at(i).hist1D->SetLineColor(
           gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fCIDtoPlot_Ceren.size() + 1)))
         );
@@ -69,6 +74,21 @@ void TBplotengine::init() {
     if (fLive)
       fApp->SetReturnFromRun(true);
 
+    if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
+      fMainFrame = new TH1D("frame", ";Bin;ADC", 1, 0., 1000.);
+      fMainFrame->SetStats(0);
+    }
+
+    if (fCalcInfo == TBplotengine::CalcInfo::kIntADC) {
+      fMainFrame = new TH1D("frame", ";IntADC;nEvents", 1, -3000., 30000.);
+      fMainFrame->SetStats(0);
+    }
+
+    if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
+      fMainFrame = new TH1D("frame", ";PeakADC;nEvents", 1, -512., 4096.);
+      fMainFrame->SetStats(0);
+    }
+
     fCanvas = new TCanvas("", "");
 
     Draw();
@@ -85,6 +105,19 @@ void TBplotengine::init() {
     fCanvas->Divide(2, 1);
 
     init_2D();
+  } else if (fCaseName == "module") {
+
+    int argc = 0;
+    char* argv[] = {};
+    fApp = new TApplication("app", &argc, argv);
+
+    if (fLive)
+      fApp->SetReturnFromRun(true);
+
+    fCanvas = new TCanvas("", "", 1000, 1000);
+    fCanvas->Divide(2, 2);
+
+    init_single_module();
   }
 
   // std::cout << fCIDtoPlot_Ceren.size() << std::endl;
@@ -98,6 +131,28 @@ void TBplotengine::init() {
   //   std::cout << i << " " << fPlotter_Scint.at(i).name << " " << fPlotter_Scint.at(i).info.row << " " << fPlotter_Scint.at(i).info.col << " ";
   //   fPlotter_Scint.at(i).cid.print();
   // }
+}
+
+void TBplotengine::init_single_module() {
+  if (fModule == "M1")
+
+  for (int i = 1; i <= 4; i++) {
+    std::string aCName = fModule + "-T" + std::to_string(i) + "-C";
+    TBcid aCCID = fUtility.GetCID(aCName);
+    TButility::mod_info aCInfo = fUtility.GetInfo(aCCID);
+
+    fCIDtoPlot_Ceren.push_back(aCCID);
+    std::vector<int> aCinterval = fConfig[aCName].as<std::vector<int>>();
+    fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCCID, aCName, aCInfo, aCinterval.at(0), aCinterval.at(1)));
+
+    std::string aSName = fModule + "-T" + std::to_string(i) + "-C";
+    TBcid aSCID = fUtility.GetCID(aSName);
+    TButility::mod_info aSInfo = fUtility.GetInfo(aSCID);
+
+    fCIDtoPlot_Scint.push_back(aSCID);
+    std::vector<int> aSinterval = fConfig[aSName].as<std::vector<int>>();
+    fPlotter_Scint.push_back(TBplotengine::PlotInfo(aSCID, aSName, aSInfo, aSinterval.at(0), aSinterval.at(1)));
+  }
 }
 
 void TBplotengine::init_2D() {
@@ -122,7 +177,7 @@ void TBplotengine::init_MCPPMT() {
       fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 220, -3000., 30000.));
 
     if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
-      fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 288, -512., 4096.));
+      fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 288, -512., 4096.));
   }
 
   f2DHistCeren = new TH2D("CERENKOV", "CERENKOV;;", 8, 0.5, 8.5, 8, 0.5, 8.5);
@@ -142,7 +197,7 @@ void TBplotengine::init_MCPPMT() {
       fPlotter_Scint.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 220, -3000., 30000.));
 
     if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
-      fPlotter_Scint.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 288, -512., 4096.));
+      fPlotter_Scint.at(i).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 288, -512., 4096.));
   }
 
   f2DHistScint = new TH2D("SCINTILLATION", "SCINTILLATION;;", 8, 0.5, 8.5, 8, 0.5, 8.5);
@@ -282,7 +337,7 @@ void TBplotengine::Fill(TBevt<TBwaveform> anEvent) {
     } else if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
       for (int i = 0; i < fPlotter_Ceren.size(); i++) {
         auto tWave = anEvent.GetData(fPlotter_Ceren.at(i).cid).waveform();
-        for (int j = 0; j < tWave.size(); j++) {
+        for (int j = 1; j <= 1000; j++) {
           fPlotter_Ceren.at(i).hist1D->Fill(j, tWave.at(j));
         }
         fPlotter_Ceren.at(i).xInit++;
@@ -324,10 +379,9 @@ void TBplotengine::Draw() {
       fPlotter_Ceren.at(0).hist2D->Draw("colz");
 
     } else {
-      for (int i = 0; i < fPlotter_Ceren.size(); i++) {
-        if (i == 0) fPlotter_Ceren.at(i).hist1D->Draw("Hist");
-        else        fPlotter_Ceren.at(i).hist1D->Draw("Hist & same");
-      }
+      fMainFrame->Draw();
+      for (int i = 0; i < fPlotter_Ceren.size(); i++)
+        fPlotter_Ceren.at(i).hist1D->Draw("sames");
 
       if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
         fLeg->Draw("same");
@@ -361,10 +415,10 @@ void TBplotengine::Update() {
         fPlotter_Ceren.at(0).hist2D->Draw("colz");
 
       } else {
+        fMainFrame->Draw();
         for (int i = 0; i < fPlotter_Ceren.size(); i++) {
 
-          if (i == 0) fPlotter_Ceren.at(i).hist1D->Draw("Hist");
-          else        fPlotter_Ceren.at(i).hist1D->Draw("Hist & sames");
+          fPlotter_Ceren.at(i).hist1D->Draw("Hist & sames");
 
           if (fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
             fCanvas->Update();
@@ -425,8 +479,7 @@ void TBplotengine::SetMaximum() {
 
   // std::cout << "TBplotengine::SetMaximum() : " << max << std::endl;
 
-  for (int i = 0; i < fPlotter_Ceren.size(); i++)
-    fPlotter_Ceren.at(i).hist1D->GetYaxis()->SetRangeUser(0., max * 1.2);
+  fMainFrame->GetYaxis()->SetRangeUser(0., max * 1.2);
 }
 
 void TBplotengine::SaveAs(TString output = "")

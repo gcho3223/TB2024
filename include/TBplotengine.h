@@ -66,6 +66,7 @@ public:
   };
 
   void init();
+  void init_single_module();
   void init_2D();
   void init_MCPPMT();
   void init_SiPM();
@@ -137,6 +138,8 @@ private:
 
   TH2D* f2DHistCeren;
   TH2D* f2DHistScint;
+
+  TH1D* fMainFrame;
 
   std::vector<TBcid> fCIDtoPlot_Ceren;
   std::vector<TBcid> fCIDtoPlot_Scint;
