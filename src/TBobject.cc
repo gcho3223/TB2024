@@ -6,7 +6,7 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
 {
   for (int i = 1; i < fArgc; i++) {
     fArgv.push_back(std::string(argv[i]));
-    std::cout << "Print " << i - 1 << " " << fArgv.at(i - 1) << std::endl;
+    // std::cout << "Print " << i - 1 << " " << fArgv.at(i - 1) << std::endl;
   }
 
   init();

@@ -104,6 +104,12 @@ void TBplotengine::init() {
     fCanvas = new TCanvas("", "", 1900, 1000);
     fCanvas->Divide(2, 1);
 
+    auto tPadLeft = fCanvas->cd(1);
+    tPadLeft->SetRightMargin(0.13);
+
+    auto tPadRight = fCanvas->cd(2);
+    tPadRight->SetRightMargin(0.13);
+
     init_2D();
   } else if (fCaseName == "module") {
 
@@ -541,10 +547,16 @@ void TBplotengine::Update() {
   } else if (fCaseName == "heatmap") {
 
     for (int i = 0; i < fPlotter_Ceren.size(); i++)
-      f2DHistCeren->SetBinContent(fPlotter_Ceren.at(i).info.row, fPlotter_Ceren.at(i).info.col, fPlotter_Ceren.at(i).hist1D->GetMean());
+      f2DHistCeren->SetBinContent(fPlotter_Ceren.at(i).info.row, fPlotter_Ceren.at(i).info.col, (int)fPlotter_Ceren.at(i).hist1D->GetMean());
 
     for (int i = 0; i < fPlotter_Scint.size(); i++)
-      f2DHistScint->SetBinContent(fPlotter_Scint.at(i).info.row, fPlotter_Scint.at(i).info.col, fPlotter_Scint.at(i).hist1D->GetMean());
+      f2DHistScint->SetBinContent(fPlotter_Scint.at(i).info.row, fPlotter_Scint.at(i).info.col, (int)fPlotter_Scint.at(i).hist1D->GetMean());
+
+    fCanvas->cd(1);
+    f2DHistCeren->Draw("colz text");
+
+    fCanvas->cd(2);
+    f2DHistScint->Draw("colz text");
 
   } else if (fCaseName == "module") {
 
@@ -651,8 +663,13 @@ void TBplotengine::SaveAs(TString output = "")
 
   outoutFile->cd();
   if (fCaseName == "single") {
-    for (int i = 0; i < fPlotter_Ceren.size(); i++)
-      fPlotter_Ceren.at(i).hist1D->Write();
+    if (fMethod == "Overlay") {
+      for (int i = 0; i < fPlotter_Ceren.size(); i++)
+        fPlotter_Ceren.at(i).hist2D->Write();
+    } else {
+      for (int i = 0; i < fPlotter_Ceren.size(); i++)
+        fPlotter_Ceren.at(i).hist1D->Write();
+    }
 
   } else if (fCaseName == "heatmap") {
     f2DHistCeren->Write();

@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
   if (obj->Help())
     return 1;
 
-  obj->Print();
+  // obj->Print();
 
   TBmonit<TBwaveform>* monit = new TBmonit<TBwaveform>(std::move(obj));
   monit->Loop();
