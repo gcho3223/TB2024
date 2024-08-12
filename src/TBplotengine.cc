@@ -15,11 +15,11 @@ void TBplotengine::init() {
 
   if (fCaseName == "single") {
 
-    if (fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
-      if (fCIDtoPlot_Ceren.size() > 5)
-        fLeg = new TLegend(0.7, 0.2, 0.9, 0.5);
+    // if (fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
+    //   if (fCIDtoPlot_Ceren.size() > 5)
+    //     fLeg = new TLegend(0.7, 0.2, 0.9, 0.5);
 
-    } else if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
+    if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
       fLeg = new TLegend(0.7, 0.2, 0.9, 0.5);
      	fLeg->SetFillStyle(0);
      	fLeg->SetBorderSize(0);
@@ -28,9 +28,12 @@ void TBplotengine::init() {
 
     gStyle->SetPalette(kVisibleSpectrum);
 
-    for (int i = 0; i < fCIDtoPlot_Ceren.size(); i++) {
-      TBcid aCID = fCIDtoPlot_Ceren.at(i);
-      std::string aName = fUtility.GetName(aCID);
+    for (int i = 0; i < fNametoPlot.size(); i++) {
+      // std::string aName = fUtility.GetName(aCID);
+      std::string aName = fNametoPlot.at(i);
+      TBcid aCID = fUtility.GetCID(aName);
+      fCIDtoPlot_Ceren.push_back(aCID);
+
       TButility::mod_info aInfo = fUtility.GetInfo(aCID);
       // std::cout << aName << " "; aCID.print();
 
@@ -39,13 +42,13 @@ void TBplotengine::init() {
         fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, interval.at(0), interval.at(1)));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-          fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 220, -3000., 30000.));
+          fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 440, -30000., 300000.));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
           fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 288, -512., 4096.));
 
         fPlotter_Ceren.at(i).hist1D->SetLineColor(
-          gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fCIDtoPlot_Ceren.size() + 1)))
+          gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fNametoPlot.size() + 1)))
         );
         fPlotter_Ceren.at(i).hist1D->SetLineWidth(2);
 
@@ -53,7 +56,7 @@ void TBplotengine::init() {
         fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, 0, 0));
         fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";Bin;ADC", 1000, 0.5, 1000.5));
         fPlotter_Ceren.at(i).hist1D->SetLineColor(
-          gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fCIDtoPlot_Ceren.size() + 1)))
+          gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fNametoPlot.size() + 1)))
         );
         fPlotter_Ceren.at(i).hist1D->SetLineWidth(2);
         fPlotter_Ceren.at(i).hist1D->SetStats(0);
@@ -80,7 +83,7 @@ void TBplotengine::init() {
     }
 
     if (fCalcInfo == TBplotengine::CalcInfo::kIntADC) {
-      fMainFrame = new TH1D("frame", ";IntADC;nEvents", 220, -3000., 30000.);
+      fMainFrame = new TH1D("frame", ";IntADC;nEvents", 440, -30000., 300000.);
       fMainFrame->SetStats(0);
     }
 
@@ -150,28 +153,28 @@ void TBplotengine::init_single_module() {
     for (int i = 1; i <= 4; i++) {
       std::string aCName = fModule + "-T" + std::to_string(i) + "-C";
       TBcid aCCID = fUtility.GetCID(aCName);
-      TButility::mod_info aCInfo = fUtility.GetInfo(aCCID);
+      TButility::mod_info aCInfo = fUtility.GetInfo(aCName);
 
       fCIDtoPlot_Ceren.push_back(aCCID);
       std::vector<int> aCinterval = fConfig[aCName].as<std::vector<int>>();
       fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCCID, aCName, aCInfo, aCinterval.at(0), aCinterval.at(1)));
 
       if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-        fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";IntADC;nEvents", 220, -3000., 30000.));
+        fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";IntADC;nEvents", 440, -30000., 300000.));
 
       if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
         fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";PeakADC;nEvents", 288, -512., 4096.));
 
       std::string aSName = fModule + "-T" + std::to_string(i) + "-S";
       TBcid aSCID = fUtility.GetCID(aSName);
-      TButility::mod_info aSInfo = fUtility.GetInfo(aSCID);
+      TButility::mod_info aSInfo = fUtility.GetInfo(aSName);
 
       fCIDtoPlot_Scint.push_back(aSCID);
       std::vector<int> aSinterval = fConfig[aSName].as<std::vector<int>>();
       fPlotter_Scint.push_back(TBplotengine::PlotInfo(aSCID, aSName, aSInfo, aSinterval.at(0), aSinterval.at(1)));
 
       if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-        fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";IntADC;nEvents", 220, -3000., 30000.));
+        fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";IntADC;nEvents", 440, -30000., 300000.));
 
       if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
         fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";PeakADC;nEvents", 288, -512., 4096.));
@@ -180,20 +183,20 @@ void TBplotengine::init_single_module() {
     for (int i = 1; i <= 9; i++) {
       if (i == 5 ) {
 
-        fPlotter_Ceren.push_back(TBplotengine::PlotInfo(TBcid(-1, -1), "M11-T5-C", TButility::mod_info(-1, -1, -1, -1), -1, -1));
-        fPlotter_Scint.push_back(TBplotengine::PlotInfo(TBcid(-1, -1), "M11-T5-S", TButility::mod_info(-1, -1, -1, -1), -1, -1));
+        fPlotter_Ceren.push_back(TBplotengine::PlotInfo(TBcid(-1, -1), "M11-T5-C", TButility::mod_info(-1, -1, -1), -1, -1));
+        fPlotter_Scint.push_back(TBplotengine::PlotInfo(TBcid(-1, -1), "M11-T5-S", TButility::mod_info(-1, -1, -1), -1, -1));
       } else {
 
         std::string aCName = fModule + "-T" + std::to_string(i) + "-C";
         TBcid aCCID = fUtility.GetCID(aCName);
-        TButility::mod_info aCInfo = fUtility.GetInfo(aCCID);
+        TButility::mod_info aCInfo = fUtility.GetInfo(aCName);
 
         fCIDtoPlot_Ceren.push_back(aCCID);
         std::vector<int> aCinterval = fConfig[aCName].as<std::vector<int>>();
         fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCCID, aCName, aCInfo, aCinterval.at(0), aCinterval.at(1)));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-          fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";IntADC;nEvents", 220, -3000., 30000.));
+          fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";IntADC;nEvents", 440, -30000., 300000.));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
           fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";PeakADC;nEvents", 288, -512., 4096.));
@@ -203,14 +206,14 @@ void TBplotengine::init_single_module() {
 
         std::string aSName = fModule + "-T" + std::to_string(i) + "-S";
         TBcid aSCID = fUtility.GetCID(aSName);
-        TButility::mod_info aSInfo = fUtility.GetInfo(aSCID);
+        TButility::mod_info aSInfo = fUtility.GetInfo(aSName);
 
         fCIDtoPlot_Scint.push_back(aSCID);
         std::vector<int> aSinterval = fConfig[aSName].as<std::vector<int>>();
         fPlotter_Scint.push_back(TBplotengine::PlotInfo(aSCID, aSName, aSInfo, aSinterval.at(0), aSinterval.at(1)));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-          fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";IntADC;nEvents", 220, -3000., 30000.));
+          fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";IntADC;nEvents", 440, -30000., 300000.));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
           fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";PeakADC;nEvents", 288, -512., 4096.));
@@ -247,7 +250,7 @@ void TBplotengine::init_MCPPMT() {
   for (int i = 0; i < 64; i++) {
     std::string aName = "C" + std::to_string(i + 1);
     TBcid aCID = fUtility.GetCID(aName);
-    TButility::mod_info aInfo = fUtility.GetInfo(aCID);
+    TButility::mod_info aInfo = fUtility.GetInfo(aName);
 
     fCIDtoPlot_Ceren.push_back(aCID);
 
@@ -255,7 +258,7 @@ void TBplotengine::init_MCPPMT() {
     fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, interval.at(0), interval.at(1)));
 
     if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-      fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 220, -3000., 30000.));
+      fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 440, -30000., 300000.));
 
     if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
       fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 288, -512., 4096.));
@@ -275,7 +278,7 @@ void TBplotengine::init_MCPPMT() {
     fPlotter_Scint.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, interval.at(0), interval.at(1)));
 
     if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-      fPlotter_Scint.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 220, -3000., 30000.));
+      fPlotter_Scint.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 440, -30000., 300000.));
 
     if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
       fPlotter_Scint.at(i).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 288, -512., 4096.));
@@ -307,15 +310,15 @@ void TBplotengine::init_MCPPMT() {
 }
 
 void TBplotengine::init_SiPM() {
-  std::cout << "init_SiPM" << std::endl;
+  // std::cout << "init_SiPM" << std::endl;
   for (int i = 21; i <= 40; i++) {
     for (int j = 21; j <= 40; j++) {
 
       std::string aName = std::to_string(i) + "-" + std::to_string(j);
       TBcid aCID = fUtility.GetCID(aName);
-      TButility::mod_info aInfo = fUtility.GetInfo(aCID);
+      TButility::mod_info aInfo = fUtility.GetInfo(aName);
 
-      std::cout << i << " " << j << " " << aName << " " << aInfo.isCeren << " " << aInfo.row << " " << aInfo.col << std::endl;
+      // std::cout << i << " " << j << " " << aName << " " << aInfo.isCeren << " " << aInfo.row << " " << aInfo.col << std::endl;
 
       if (aInfo.isCeren == -1)
         continue;
@@ -328,10 +331,10 @@ void TBplotengine::init_SiPM() {
         fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, interval.at(0), interval.at(1)));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-          fPlotter_Ceren.at(fPlotter_Ceren.size() - 1).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 220, -3000., 30000.));
+          fPlotter_Ceren.at(fPlotter_Ceren.size() - 1).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 440, -30000., 300000.));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
-          fPlotter_Ceren.at(fPlotter_Ceren.size() - 1).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 288, -512., 4096.));
+          fPlotter_Ceren.at(fPlotter_Ceren.size() - 1).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 288, -512., 4096.));
 
       } else {
 
@@ -341,10 +344,10 @@ void TBplotengine::init_SiPM() {
         fPlotter_Scint.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, interval.at(0), interval.at(1)));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-          fPlotter_Scint.at(fPlotter_Scint.size() - 1).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 220, -3000., 30000.));
+          fPlotter_Scint.at(fPlotter_Scint.size() - 1).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 440, -30000., 300000.));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
-          fPlotter_Scint.at(fPlotter_Scint.size() - 1).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 288, -512., 4096.));
+          fPlotter_Scint.at(fPlotter_Scint.size() - 1).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 288, -512., 4096.));
 
       }
     }
@@ -546,12 +549,26 @@ void TBplotengine::Update() {
     }
   } else if (fCaseName == "heatmap") {
 
-    for (int i = 0; i < fPlotter_Ceren.size(); i++)
+    for (int i = 0; i < fPlotter_Ceren.size(); i++) {
       f2DHistCeren->SetBinContent(fPlotter_Ceren.at(i).info.row, fPlotter_Ceren.at(i).info.col, (int)fPlotter_Ceren.at(i).hist1D->GetMean());
 
-    for (int i = 0; i < fPlotter_Scint.size(); i++)
+      // std::cout << "CEREN - " << i
+      //           << " " << fPlotter_Ceren.at(i).name
+      //           << " " << fPlotter_Ceren.at(i).cid.mid()
+      //           << " " << fPlotter_Ceren.at(i).cid.channel()
+      //           << " " << fPlotter_Ceren.at(i).hist1D->GetMean() << std::endl;
+
+    }
+    for (int i = 0; i < fPlotter_Scint.size(); i++) {
       f2DHistScint->SetBinContent(fPlotter_Scint.at(i).info.row, fPlotter_Scint.at(i).info.col, (int)fPlotter_Scint.at(i).hist1D->GetMean());
 
+      // std::cout << "SCINT - " << i
+      //           << " " << fPlotter_Scint.at(i).name
+      //           << " " << fPlotter_Scint.at(i).cid.mid()
+      //           << " " << fPlotter_Scint.at(i).cid.channel()
+      //           << " " << fPlotter_Scint.at(i).hist1D->GetMean() << std::endl;
+
+    }
     fCanvas->cd(1);
     f2DHistCeren->Draw("colz text");
 

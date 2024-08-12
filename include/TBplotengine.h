@@ -98,7 +98,8 @@ public:
   std::vector<int> GetUniqueMID();
 
   void SetCID(std::vector<TBcid> cids) { fCIDtoPlot_Ceren = cids; }
-  // void SetCID(std::string cases) { SetCID(fUtility.loadCID(cases)); }
+  void SetCID(std::vector<std::string> names) { fNametoPlot = names; }
+
   void SetCase(std::string cases) { fCaseName = cases; }
   void SetModule(std::string module) { fModule = module; }
 
@@ -143,6 +144,8 @@ private:
   TH2D* f2DHistScint;
 
   TH1D* fMainFrame;
+
+  std::vector<std::string> fNametoPlot;
 
   std::vector<TBcid> fCIDtoPlot_Ceren;
   std::vector<TBcid> fCIDtoPlot_Scint;

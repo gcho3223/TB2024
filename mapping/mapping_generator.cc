@@ -11,7 +11,6 @@ int mapping_generator(std::string inputMap) {
 	int ch = 0;
 	TString name = "";
 
-	int cases = 0;
 	int isCeren = 0;
 	int row = 0;
 	int column = 0;
@@ -34,14 +33,13 @@ int mapping_generator(std::string inputMap) {
 	TTree* aTree_DQM = new TTree("mapping_DQM", "mapping_DQM");
 
 	aTree_DQM->Branch("name", &name);
-	aTree_DQM->Branch("cases", &cases);
 	aTree_DQM->Branch("isCeren", &isCeren);
 	aTree_DQM->Branch("row", &row);
 	aTree_DQM->Branch("column", &column);
 
   in.open(inputMap + "_DQM.csv", std::ios::in);
   while (true) {
-    in >> name >> cases >> isCeren >> row >> column;
+    in >> name >> isCeren >> row >> column;
     if (!in.good()) break;
     aTree_DQM->Fill();
   }

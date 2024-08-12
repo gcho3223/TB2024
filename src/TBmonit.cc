@@ -132,11 +132,12 @@ void TBmonit<T>::LoopLive() {
   if (aModules.size() == 1 && (aCase == "heatmap" || aCase == "module")) {
     fPlotter.SetModule(aModules.at(0));
   } else if (aCase == "single") {
-    std::vector<TBcid> aCID;
-    for (int i = 0; i < aModules.size(); i++)
-      aCID.push_back(fUtility.GetCID(aModules.at(i)));
 
-    fPlotter.SetCID(aCID);
+    // std::vector<TBcid> aCID;
+    // for (int i = 0; i < aModules.size(); i++)
+    //   aCID.push_back(fUtility.GetCID(aModules.at(i)));
+
+    fPlotter.SetCID(aModules);
   } else {
     // !throw exception
   }
@@ -216,11 +217,11 @@ void TBmonit<T>::LoopAfterRun() {
   if (aModules.size() == 1 && (aCase == "heatmap" || aCase == "module")) {
     fPlotter.SetModule(aModules.at(0));
   } else if (aCase == "single") {
-    std::vector<TBcid> aCID;
-    for (int i = 0; i < aModules.size(); i++)
-      aCID.push_back(fUtility.GetCID(aModules.at(i)));
+    // std::vector<TBcid> aCID;
+    // for (int i = 0; i < aModules.size(); i++)
+    //   aCID.push_back(fUtility.GetCID(aModules.at(i)));
 
-    fPlotter.SetCID(aCID);
+    fPlotter.SetCID(aModules);
   } else {
     // !throw exception
   }
