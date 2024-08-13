@@ -45,7 +45,7 @@ void TBplotengine::init() {
           fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 440, -30000., 300000.));
 
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
-          fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 288, -512., 4096.));
+          fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 288, -512., 4096.));
 
         fPlotter_Ceren.at(i).hist1D->SetLineColor(
           gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fNametoPlot.size() + 1)))
