@@ -33,7 +33,7 @@ TBmonit<T>::TBmonit(const std::string &fConfig_, int fRunNum_)
 : fConfig(TBconfig(fConfig_)), fRunNum(fRunNum_), fMaxEvent(-1), fMaxFile(-1)
 {
   fIsLive = false;
-  fAuxPlotting  = false;
+  fAuxPlotting = false;
   fAuxCut  = false;
 
   fUtility = TButility();
@@ -154,12 +154,18 @@ void TBmonit<T>::LoopLive() {
   }
 
   fPlotter.init();
-  fAux.init();
+  if (fAuxPlotting) {
+    fAux.init();
+    fAux.SetRange(fConfig.GetConfig()["ModuleConfig"]);
+  }
 
   fPlotter.SetApp(fApp);
-  fAux.SetApp(fApp);
+  if (fAuxPlotting)
+    fAux.SetApp(fApp);
 
-  fAux.SetRange(fConfig.GetConfig()["ModuleConfig"]);
+  std::vector<int> tUniqueMID = {};
+  if (fAuxPlotting) tUniqueMID = fUtility.GetUniqueMID(fPlotter.GetUniqueMID(), fAux.GetUniqueMID());
+  else              tUniqueMID = fPlotter.GetUniqueMID();
 
   TBread<TBwaveform> readerWave =
     TBread<TBwaveform>(
@@ -168,7 +174,7 @@ void TBmonit<T>::LoopLive() {
       fMaxFile,
       fIsLive,
       fBaseDir,
-      fUtility.GetUniqueMID(fPlotter.GetUniqueMID(), fAux.GetUniqueMID())
+      tUniqueMID
     );
 
     while(1) {
@@ -198,11 +204,18 @@ void TBmonit<T>::LoopLive() {
         }
 
         TBevt<TBwaveform> anEvent = readerWave.GetAnEvent();
+
+        if (fAuxCut)
+          if (!fAux.IsPassing(anEvent))
+            continue;
+
         fPlotter.Fill(anEvent);
-        fAux.Fill(anEvent);
+        if (fAuxPlotting)
+          fAux.Fill(anEvent);
       }
       fPlotter.Update();
-      fAux.Update();
+      if (fAuxPlotting)
+        fAux.Update();
     }
 }
 
@@ -213,6 +226,7 @@ void TBmonit<T>::LoopAfterRun() {
   ANSI_CODE ANSI = ANSI_CODE();
 
   TBplotengine fPlotter = TBplotengine(fConfig.GetConfig()["ModuleConfig"], fRunNum, fIsLive, fUtility);
+  TBaux fAux = TBaux(fConfig.GetConfig()["AUX"], fRunNum, fAuxPlotting, fIsLive, fUtility);
 
   std::string aCase;
   fObj->GetVariable("type", &aCase); //'single', 'heatmap', 'module'
@@ -228,6 +242,7 @@ void TBmonit<T>::LoopAfterRun() {
     // !throw exception
   } else {
     fPlotter.SetMethod(aMethod);
+    fAux.SetMethod(aMethod);
   }
 
   std::vector<std::string> aModules = {};
@@ -247,6 +262,18 @@ void TBmonit<T>::LoopAfterRun() {
   }
 
   fPlotter.init();
+  if (fAuxPlotting) {
+    fAux.init();
+    fAux.SetRange(fConfig.GetConfig()["ModuleConfig"]);
+  }
+
+  fPlotter.SetApp(fApp);
+  if (fAuxPlotting)
+    fAux.SetApp(fApp);
+
+  std::vector<int> tUniqueMID = {};
+  if (fAuxPlotting) tUniqueMID = fUtility.GetUniqueMID(fPlotter.GetUniqueMID(), fAux.GetUniqueMID());
+  else              tUniqueMID = fPlotter.GetUniqueMID();
 
   TBread<TBwaveform> readerWave =
     TBread<TBwaveform>(
@@ -255,7 +282,7 @@ void TBmonit<T>::LoopAfterRun() {
       fMaxFile,
       fIsLive,
       fBaseDir,
-      fPlotter.GetUniqueMID()
+      tUniqueMID
     );
 
 
@@ -283,10 +310,19 @@ void TBmonit<T>::LoopAfterRun() {
       std::cout << ANSI.END << std::endl;
     }
 
-    TBevt<TBwaveform> aEvent;
-    fPlotter.Fill(readerWave.GetAnEvent());
+    TBevt<TBwaveform> anEvent = readerWave.GetAnEvent();
+
+    if (fAuxCut)
+      if (!fAux.IsPassing(anEvent))
+        continue;
+
+    fPlotter.Fill(anEvent);
+    if (fAuxPlotting)
+      fAux.Fill(anEvent);
   }
   fPlotter.Update();
+  if (fAuxPlotting)
+    fAux.Update();
 }
 
 

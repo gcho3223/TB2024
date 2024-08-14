@@ -10,14 +10,9 @@ TBplotengine::TBplotengine(const YAML::Node fConfig_, int fRunNum_, bool fLive_,
 
 void TBplotengine::init() {
 
-  // fUtility.LoadMapping("../mapping/mapping_TB2024_v1.root");
   fIsFirst = true;
 
   if (fCaseName == "single") {
-
-    // if (fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
-    //   if (fCIDtoPlot_Ceren.size() > 5)
-    //     fLeg = new TLegend(0.7, 0.2, 0.9, 0.5);
 
     if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
       fLeg = new TLegend(0.7, 0.2, 0.9, 0.5);
@@ -71,12 +66,6 @@ void TBplotengine::init() {
       }
     }
 
-    // int argc = 0;
-    // char* argv[] = {};
-    // fApp = new TApplication("app", &argc, argv);
-    // if (fLive)
-    //   fApp->SetReturnFromRun(true);
-
     if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
       fMainFrame = new TH1D("frame", ";Bin;ADC", 1000, 0.5, 1000.5);
       fMainFrame->SetStats(0);
@@ -92,19 +81,12 @@ void TBplotengine::init() {
       fMainFrame->SetStats(0);
     }
 
-    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 1000, 1000);
+    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 1400, 1400);
 
     Draw();
   } else if (fCaseName == "heatmap") {
 
-    // int argc = 0;
-    // char* argv[] = {};
-    // fApp = new TApplication("app", &argc, argv);
-
-    // if (fLive)
-    //   fApp->SetReturnFromRun(true);
-
-    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 1900, 1000);
+    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 2700, 1000);
     fCanvas->Divide(2, 1);
 
     auto tPadLeft = fCanvas->cd(1);
@@ -116,18 +98,9 @@ void TBplotengine::init() {
     init_2D();
   } else if (fCaseName == "module") {
 
-    // int argc = 0;
-    // char* argv[] = {};
-    // fApp = new TApplication("app", &argc, argv);
-
-    // if (fLive)
-    //   fApp->SetReturnFromRun(true);
-
-    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 1000, 1000);
+    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 1400, 1400);
     if (fModule == "M11") fCanvas->Divide(3, 3);
     else                  fCanvas->Divide(2, 2);
-
-    // std::cout << "fModule: " << fModule << std::endl;
 
     init_single_module();
   }
@@ -318,8 +291,6 @@ void TBplotengine::init_SiPM() {
       TBcid aCID = fUtility.GetCID(aName);
       TButility::mod_info aInfo = fUtility.GetInfo(aName);
 
-      // std::cout << i << " " << j << " " << aName << " " << aInfo.isCeren << " " << aInfo.row << " " << aInfo.col << std::endl;
-
       if (aInfo.isCeren == -1)
         continue;
 
@@ -404,7 +375,6 @@ double TBplotengine::GetIntADC(std::vector<short> waveform, int xInit, int xFin)
 
   return intADC_;
 }
-
 
 void TBplotengine::PrintInfo() {
 
@@ -540,9 +510,6 @@ void TBplotengine::Update() {
           }
         }
 
-        // if ((fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) && fPlotter_Ceren.size() >5)
-        //   fLeg->Draw("same");
-
         if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
           fLeg->Draw("same");
       }
@@ -640,13 +607,8 @@ void TBplotengine::Update() {
   fCanvas->Update();
   fCanvas->Pad()->Draw();
 
-  if (!fLive) {
-    fApp->Run(true);
-  } else {
-    gSystem->ProcessEvents();
-  }
-
-  gSystem->Sleep(5000);
+  gSystem->ProcessEvents();
+  gSystem->Sleep(1000);
 
   if (fLive)
     if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
@@ -663,10 +625,7 @@ void TBplotengine::SetMaximum() {
     if (max < fPlotter_Ceren.at(i).hist1D->GetMaximum()) {
       max = fPlotter_Ceren.at(i).hist1D->GetMaximum();
     }
-    // std::cout << fPlotter_Ceren.at(i).hist1D->GetName() << " " << fPlotter_Ceren.at(i).hist1D->GetMaximum() << std::endl;
   }
-
-  // std::cout << "TBplotengine::SetMaximum() : " << max << std::endl;
 
   fMainFrame->GetYaxis()->SetRangeUser(0., max * 1.2);
 }

@@ -39,10 +39,16 @@ public:
   void Fill(TBevt<TBwaveform> anEvent);
   void Fill(TBevt<TBfastmode> anEvent) {}
 
+  float LinearInterp(float x1, float y1, float x2, float y2, float threshold);
+  float GetLeadingEdgeBin(std::vector<float> waveform, float percent);
+  std::vector<float> GetPosition(std::vector<std::vector<float>> wave); // 1R, 1L, 1U, 1D, 2R, 2L, 2U, 2D
+
+
+
   void Draw();
   void Update();
 
-  void SaveAs(TString output) {}
+  void SaveAs(TString output = "");
 
   double GetPeakADC(std::vector<short> waveform, int xInit, int xFin);
   double GetIntADC(std::vector<short> waveform, int xInit, int xFin);
@@ -67,6 +73,10 @@ public:
   void SetMethod(std::string fMethod_) { fMethod = fMethod_; }
   void SetApp(TApplication* fApp_) { fApp = fApp_; }
 
+  bool IsPassing(TBevt<TBwaveform> anEvent);
+
+  void SetMaximum();
+
 private:
   const YAML::Node fNodeAux;
   int fRunNum;
@@ -77,14 +87,22 @@ private:
   TApplication* fApp;
   TCanvas* fCanvas;
 
+  bool fIsFirst;
+
   std::string fMethod;
 
   TH2D* fDWC1;
   TH2D* fDWC2;
   TH2D* fDWCXaxis;
   TH2D* fDWCYaxis;
+
   TH1D* fPS;
   TH1D* fMC;
+  TH1D* fCC1;
+  TH1D* fCC2;
+
+  TH1D* fFrameTop;
+  TH1D* fFrameBot;
 
   double fPScut;
   double fMCcut;
@@ -94,11 +112,11 @@ private:
   std::vector<TBcid> fCIDtoPlot;
   std::map<std::string, std::vector<int>> fRangeMap;
 
-  // DWC_1_X, DWC_1_Y, DWC_2_X, DWC_2_Y
-  std::vector<double> fDWCCalib;
-
   // DWC1 horizontal slope, DWC1 horizontal offset, DWC1 vertical slope, DWC1 vertical offset
   // DWC2 horizontal slope, DWC2 horizontal offset, DWC2 vertical slope, DWC2 vertical offset
+  std::vector<double> fDWCCalib;
+
+  // DWC_1_X, DWC_1_Y, DWC_2_X, DWC_2_Y
   std::vector<double> fDWCCenter;
 
 };
