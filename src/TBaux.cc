@@ -130,9 +130,8 @@ float TBaux::GetLeadingEdgeBin(std::vector<float> waveform, float percent) {
   float thr = max * percent;
 
   for (int i = 1; i < 1000; i++) {
-    if ((waveform.at(i) < thr && waveform.at(i + 1) > thr) ||
-        (waveform.at(i) > thr && waveform.at(i + 1) < thr)) {
-          return LinearInterp(static_cast<float>(i), static_cast<float>(i + 1), waveform.at(i), waveform.at(i + 1), thr);
+    if (waveform.at(i) < thr && waveform.at(i + 1) > thr) {
+          return LinearInterp(static_cast<float>(i), waveform.at(i), static_cast<float>(i + 1), waveform.at(i + 1), thr);
     }
   }
   return -1; // Return -1 if no crossing is found
