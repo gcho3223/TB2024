@@ -35,6 +35,8 @@ private:
   ObjectCollection* fObj;
   TButility fUtility;
 
+  TApplication* fApp;
+
   std::string fBaseDir;
   std::string fMapping;
 
@@ -43,7 +45,8 @@ private:
   int fMaxFile;
 
   bool fIsLive;
-  bool fIsAux;
+  bool fAuxPlotting;
+  bool fAuxCut;
 };
 
 #endif

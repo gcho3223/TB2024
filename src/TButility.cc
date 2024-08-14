@@ -76,6 +76,29 @@ TButility::mod_info TButility::GetInfo(TString name) const {
   else return mapping_NAME_INFO.at(name);
 }
 
+std::vector<int> TButility::GetUniqueMID(std::vector<int> vec_1, std::vector<int> vec_2) {
+  std::vector<int> return_vec;
+  std::map<int, int> aMap;
+
+  for (int i = 0; i < vec_1.size(); i++) {
+    if (vec_1.at(i) == -1) continue;
+    if (aMap.find(vec_1.at(i)) == aMap.end()) {
+      return_vec.push_back(vec_1.at(i));
+      aMap.insert(std::make_pair(vec_1.at(i), 1));
+    }
+  }
+
+  for (int i = 0; i < vec_2.size(); i++) {
+    if (vec_2.at(i) == -1) continue;
+    if (aMap.find(vec_2.at(i)) == aMap.end()) {
+      return_vec.push_back(vec_2.at(i));
+      aMap.insert(std::make_pair(vec_2.at(i), 1));
+    }
+  }
+
+  return return_vec;
+}
+
 std::vector<int> TButility::GetUniqueMID(std::vector<TBcid> aCID) {
   std::vector<int> return_vec;
   std::map<int, int> aMap;

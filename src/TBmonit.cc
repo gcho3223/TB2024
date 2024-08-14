@@ -3,6 +3,7 @@
 #include "TBevt.h"
 #include "TBread.h"
 #include "TButility.h"
+#include "TBaux.h"
 
 #include <stdexcept>
 #include <stdio.h>
@@ -32,7 +33,8 @@ TBmonit<T>::TBmonit(const std::string &fConfig_, int fRunNum_)
 : fConfig(TBconfig(fConfig_)), fRunNum(fRunNum_), fMaxEvent(-1), fMaxFile(-1)
 {
   fIsLive = false;
-  fIsAux  = false;
+  fAuxPlotting  = false;
+  fAuxCut  = false;
 
   fUtility = TButility();
 }
@@ -55,12 +57,19 @@ TBmonit<T>::TBmonit(ObjectCollection* fObj_)
   fObj->GetVariable("MaxFile", &fMaxFile);
 
   fObj->GetVariable("LIVE", &fIsLive);
-  fObj->GetVariable("AUX", &fIsAux);
+  fObj->GetVariable("AUX", &fAuxPlotting);
+  fObj->GetVariable("AUXcut", &fAuxCut);
 
   if (fIsLive) {
     fMaxEvent = -1;
     fMaxFile = -1;
   }
+
+  int argc = 0;
+  char* argv[] = {};
+  fApp = new TApplication("app", &argc, argv);
+  if (fIsLive)
+    fApp->SetReturnFromRun(true);
 }
 
 template <typename T>
@@ -108,6 +117,7 @@ void TBmonit<T>::LoopLive() {
   ANSI_CODE ANSI = ANSI_CODE();
 
   TBplotengine fPlotter = TBplotengine(fConfig.GetConfig()["ModuleConfig"], fRunNum, fIsLive, fUtility);
+  TBaux fAux = TBaux(fConfig.GetConfig()["AUX"], fRunNum, fAuxPlotting, fIsLive, fUtility);
 
   std::string aCase;
   fObj->GetVariable("type", &aCase); //'single', 'heatmap'
@@ -123,6 +133,7 @@ void TBmonit<T>::LoopLive() {
     // !throw exception
   } else {
     fPlotter.SetMethod(aMethod);
+    fAux.SetMethod(aMethod);
   }
 
   std::vector<std::string> aModules = {};
@@ -143,6 +154,12 @@ void TBmonit<T>::LoopLive() {
   }
 
   fPlotter.init();
+  fAux.init();
+
+  fPlotter.SetApp(fApp);
+  fAux.SetApp(fApp);
+
+  fAux.SetRange(fConfig.GetConfig()["ModuleConfig"]);
 
   TBread<TBwaveform> readerWave =
     TBread<TBwaveform>(
@@ -151,7 +168,7 @@ void TBmonit<T>::LoopLive() {
       fMaxFile,
       fIsLive,
       fBaseDir,
-      fPlotter.GetUniqueMID()
+      fUtility.GetUniqueMID(fPlotter.GetUniqueMID(), fAux.GetUniqueMID())
     );
 
     while(1) {
@@ -180,9 +197,12 @@ void TBmonit<T>::LoopLive() {
           std::cout << ANSI.END << std::endl;
         }
 
-        fPlotter.Fill(readerWave.GetAnEvent());
+        TBevt<TBwaveform> anEvent = readerWave.GetAnEvent();
+        fPlotter.Fill(anEvent);
+        fAux.Fill(anEvent);
       }
       fPlotter.Update();
+      fAux.Update();
     }
 }
 

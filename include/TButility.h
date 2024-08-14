@@ -41,6 +41,7 @@ public:
 
   std::vector<int> GetUniqueMID(std::vector<TBcid> aCID);
   std::vector<int> GetUniqueMID(std::vector<TBcid> aCID_1, std::vector<TBcid> aCID_2);
+  std::vector<int> GetUniqueMID(std::vector<int> vec_1, std::vector<int> vec_2);
 
 private:
   std::map<TBcid, std::string> mapping_CID_NAME;

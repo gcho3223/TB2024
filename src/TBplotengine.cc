@@ -71,11 +71,11 @@ void TBplotengine::init() {
       }
     }
 
-    int argc = 0;
-    char* argv[] = {};
-    fApp = new TApplication("app", &argc, argv);
-    if (fLive)
-      fApp->SetReturnFromRun(true);
+    // int argc = 0;
+    // char* argv[] = {};
+    // fApp = new TApplication("app", &argc, argv);
+    // if (fLive)
+    //   fApp->SetReturnFromRun(true);
 
     if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
       fMainFrame = new TH1D("frame", ";Bin;ADC", 1000, 0.5, 1000.5);
@@ -92,19 +92,19 @@ void TBplotengine::init() {
       fMainFrame->SetStats(0);
     }
 
-    fCanvas = new TCanvas("", "", 1500, 1000);
+    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 1000, 1000);
 
     Draw();
   } else if (fCaseName == "heatmap") {
 
-    int argc = 0;
-    char* argv[] = {};
-    fApp = new TApplication("app", &argc, argv);
+    // int argc = 0;
+    // char* argv[] = {};
+    // fApp = new TApplication("app", &argc, argv);
 
-    if (fLive)
-      fApp->SetReturnFromRun(true);
+    // if (fLive)
+    //   fApp->SetReturnFromRun(true);
 
-    fCanvas = new TCanvas("", "", 1900, 1000);
+    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 1900, 1000);
     fCanvas->Divide(2, 1);
 
     auto tPadLeft = fCanvas->cd(1);
@@ -116,14 +116,14 @@ void TBplotengine::init() {
     init_2D();
   } else if (fCaseName == "module") {
 
-    int argc = 0;
-    char* argv[] = {};
-    fApp = new TApplication("app", &argc, argv);
+    // int argc = 0;
+    // char* argv[] = {};
+    // fApp = new TApplication("app", &argc, argv);
 
-    if (fLive)
-      fApp->SetReturnFromRun(true);
+    // if (fLive)
+    //   fApp->SetReturnFromRun(true);
 
-    fCanvas = new TCanvas("", "", 1000, 1000);
+    fCanvas = new TCanvas("fCanvasPlot", "fCanvasPlot", 1000, 1000);
     if (fModule == "M11") fCanvas->Divide(3, 3);
     else                  fCanvas->Divide(2, 2);
 

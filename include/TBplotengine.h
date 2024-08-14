@@ -81,16 +81,16 @@ public:
 
   void SaveAs(TString output);
 
-  double GetPeakADC(std::vector<short> waveform, int xInit, int xFil);
-  double GetIntADC(std::vector<short> waveform, int xInit, int xFil);
+  double GetPeakADC(std::vector<short> waveform, int xInit, int xFin);
+  double GetIntADC(std::vector<short> waveform, int xInit, int xFin);
 
-  double GetValue(std::vector<short> waveform, int xInit, int xFil) {
+  double GetValue(std::vector<short> waveform, int xInit, int xFin) {
 
     if(fCalcInfo == CalcInfo::kPeakADC)
-      return GetPeakADC(waveform, xInit, xFil);
+      return GetPeakADC(waveform, xInit, xFin);
 
     if(fCalcInfo == CalcInfo::kIntADC)
-      return GetIntADC(waveform, xInit, xFil);
+      return GetIntADC(waveform, xInit, xFin);
 
     return -999;
   }
@@ -121,6 +121,8 @@ public:
     if (fMethod == "AUX")
       fCalcInfo = kAux;
   }
+
+  void SetApp(TApplication* fApp_) { fApp = fApp_; }
 
 private:
   const YAML::Node fConfig;
