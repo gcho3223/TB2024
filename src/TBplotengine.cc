@@ -11,6 +11,7 @@ TBplotengine::TBplotengine(const YAML::Node fConfig_, int fRunNum_, bool fLive_,
 void TBplotengine::init() {
 
   fIsFirst = true;
+  fUsingAUX = false;
 
   if (fCaseName == "single") {
 
@@ -138,6 +139,9 @@ void TBplotengine::init_single_module() {
       if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
         fPlotter_Ceren.at(i - 1).SetPlot(new TH1D((TString)(aCName), ";PeakADC;nEvents", 288, -512., 4096.));
 
+      fPlotter_Ceren.at(i - 1).hist1D->SetLineWidth(2);
+      fPlotter_Ceren.at(i - 1).hist1D->SetLineColor(kBlue);
+
       std::string aSName = fModule + "-T" + std::to_string(i) + "-S";
       TBcid aSCID = fUtility.GetCID(aSName);
       TButility::mod_info aSInfo = fUtility.GetInfo(aSName);
@@ -151,6 +155,9 @@ void TBplotengine::init_single_module() {
 
       if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
         fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";PeakADC;nEvents", 288, -512., 4096.));
+    
+      fPlotter_Scint.at(i - 1).hist1D->SetLineWidth(2);
+      fPlotter_Scint.at(i - 1).hist1D->SetLineColor(kRed);
     }
   } else {
     for (int i = 1; i <= 9; i++) {
@@ -607,7 +614,13 @@ void TBplotengine::Update() {
   fCanvas->Update();
   fCanvas->Pad()->Draw();
 
-  gSystem->ProcessEvents();
+  std::cout << fUsingAUX << std::endl;
+
+  if (fUsingAUX) gSystem->ProcessEvents();
+  else           fApp->Run(false);
+
+  
+
   gSystem->Sleep(1000);
 
   if (fLive)

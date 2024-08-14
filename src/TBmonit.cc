@@ -265,6 +265,7 @@ void TBmonit<T>::LoopAfterRun() {
   if (fAuxPlotting) {
     fAux.init();
     fAux.SetRange(fConfig.GetConfig()["ModuleConfig"]);
+    fPlotter.SetAUX();
   }
 
   fPlotter.SetApp(fApp);

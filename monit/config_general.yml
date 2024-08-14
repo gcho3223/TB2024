@@ -1,4 +1,4 @@
-BaseDirectory: "../sample_data"
+BaseDirectory: "/Users/yhep/scratch/YUdaq"
 Mapping: "../mapping/mapping_TB2024_v1.root"
 AUX:
   PS:
@@ -15,7 +15,7 @@ AUX:
     PeakADC: 1000
   DWC:
     CENTER: [0.0, 0.0, 0.0, 0.0]
-    CALIB: [0.1, 0.1, 0.1, 0.1]
+    CALIB: [0.2013, 0.497, 0.204, 0.6179, -0.2013, -0.497, -0.204, -0.6179]
 ModuleConfig:
   27-22: [100, 200]
   27-24: [100, 200]

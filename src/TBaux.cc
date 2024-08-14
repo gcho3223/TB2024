@@ -11,8 +11,8 @@ TBaux::TBaux(const YAML::Node fNodePlot_, int fRunNum_, bool fPlotting_, bool fL
 {
 
   fIsFirst = true;
-  fDWCCalib = fNodeAux["DWC"]["CALIB"].as<std::vector<double>>();
-  fDWCCenter = fNodeAux["DWC"]["CENTER"].as<std::vector<double>>();
+  fDWCCalib = fNodeAux["DWC"]["CALIB"].as<std::vector<float>>();
+  fDWCCenter = fNodeAux["DWC"]["CENTER"].as<std::vector<float>>();
 }
 
 void TBaux::init() {
@@ -171,12 +171,7 @@ void TBaux::Fill(TBevt<TBwaveform> anEvent) {
   tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2U")).pedcorrectedWaveform());
   tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2D")).pedcorrectedWaveform());
 
-  std::cout << tDWCwaves.size() << std::endl;
-
   auto posVec = GetPosition(tDWCwaves);
-
-  std::cout << posVec.size() << std::endl;
-
 
   fDWC1->Fill(posVec.at(0), posVec.at(1));
   fDWC2->Fill(posVec.at(2), posVec.at(3));

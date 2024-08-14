@@ -123,6 +123,7 @@ public:
   }
 
   void SetApp(TApplication* fApp_) { fApp = fApp_; }
+  void SetAUX() { fUsingAUX = true; }
 
 private:
   const YAML::Node fConfig;
@@ -131,6 +132,7 @@ private:
 
   bool fIsFirst;
   bool fLive;
+  bool fUsingAUX;
 
   TApplication* fApp;
   TCanvas* fCanvas;

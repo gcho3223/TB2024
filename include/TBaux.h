@@ -114,10 +114,10 @@ private:
 
   // DWC1 horizontal slope, DWC1 horizontal offset, DWC1 vertical slope, DWC1 vertical offset
   // DWC2 horizontal slope, DWC2 horizontal offset, DWC2 vertical slope, DWC2 vertical offset
-  std::vector<double> fDWCCalib;
+  std::vector<float> fDWCCalib;
 
   // DWC_1_X, DWC_1_Y, DWC_2_X, DWC_2_Y
-  std::vector<double> fDWCCenter;
+  std::vector<float> fDWCCenter;
 
 };
 
