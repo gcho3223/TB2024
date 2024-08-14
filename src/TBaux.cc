@@ -48,15 +48,15 @@ void TBaux::init() {
   fDWCYaxis->SetStats(0);
 
   if (fMethod == "IntADC") {
-    fPS = new TH1D("PS", ";IntADC;nEvents", 440, -30000., 300000.);
-    fMC = new TH1D("MC", ";IntADC;nEvents", 440, -30000., 300000.);
+    fPS = new TH1D("PS_AUX", ";IntADC;nEvents", 440, -30000., 300000.);
+    fMC = new TH1D("MC_AUX", ";IntADC;nEvents", 440, -30000., 300000.);
     fCC1 = new TH1D("CC1", ";IntADC;nEvents", 440, -30000., 300000.);
     fCC2 = new TH1D("CC2", ";IntADC;nEvents", 440, -30000., 300000.);
     fFrameTop = new TH1D("TopFrame", ";IntADC;nEvents", 440, -30000., 300000.);
     fFrameBot = new TH1D("BotFrame", ";IntADC;nEvents", 440, -30000., 300000.);
   } else if (fMethod == "PeakADC") {
-    fPS = new TH1D("PS", ";PeakADC;nEvents", 288, -512., 4096.);
-    fMC = new TH1D("MC", ";PeakADC;nEvents", 288, -512., 4096.);
+    fPS = new TH1D("PS_AUX", ";PeakADC;nEvents", 288, -512., 4096.);
+    fMC = new TH1D("MC_AUX", ";PeakADC;nEvents", 288, -512., 4096.);
     fCC1 = new TH1D("CC1", ";PeakADC;nEvents", 288, -512., 4096.);
     fCC2 = new TH1D("CC2", ";PeakADC;nEvents", 288, -512., 4096.);
     fFrameTop = new TH1D("TopFrame", ";PeakADC;nEvents", 288, -512., 4096.);
@@ -252,6 +252,7 @@ void TBaux::Update() {
   fCanvas->cd(3);
   fFrameTop->Draw("");
 
+  fCanvas->cd(3);
   fPS->Draw("Hist sames");
   if (fIsFirst) {
     fCanvas->Update();
@@ -262,6 +263,7 @@ void TBaux::Update() {
     stat->SaveStyle();
   }
 
+  fCanvas->cd(3);
   fMC->Draw("Hist sames");
   if (fIsFirst) {
     fCanvas->Update();
@@ -276,6 +278,7 @@ void TBaux::Update() {
   fCanvas->cd(6);
   fFrameBot->Draw("");
 
+  fCanvas->cd(6);
   fCC1->Draw("Hist sames");
   if (fIsFirst) {
     fCanvas->Update();
@@ -286,6 +289,7 @@ void TBaux::Update() {
     stat->SaveStyle();
   }
 
+  fCanvas->cd(6);
   fCC2->Draw("Hist sames");
   if (fIsFirst) {
     fCanvas->Update();
@@ -303,11 +307,18 @@ void TBaux::Update() {
   fCanvas->Update();
   fCanvas->Pad()->Draw();
 
-  if (!fLive) {
-    fApp->Run(true);
-  } else {
-    gSystem->ProcessEvents();
-  }
+  // if (!fLive) {
+  //   fApp->Run(false);
+  // } else {
+  //   // gSystem->ProcessEvents();
+  //   fApp->Run(true);
+  // }
+
+  if (fLive) fApp->Run(false);
+  if (!fLive) fApp->Run(false);
+
+
+
 
   gSystem->Sleep(1000);
 }

@@ -1,4 +1,4 @@
-BaseDirectory: "/Users/yhep/scratch/YUdaq"
+BaseDirectory: "../sample_data"
 Mapping: "../mapping/mapping_TB2024_v1.root"
 AUX:
   PS:

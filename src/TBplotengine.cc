@@ -614,10 +614,13 @@ void TBplotengine::Update() {
   fCanvas->Update();
   fCanvas->Pad()->Draw();
 
-  std::cout << fUsingAUX << std::endl;
+  // if (fUsingAUX) gSystem->ProcessEvents();
+  // else           fApp->Run(false);
 
-  if (fUsingAUX) gSystem->ProcessEvents();
-  else           fApp->Run(false);
+  if (fLive && fUsingAUX) gSystem->ProcessEvents();
+  if (fLive && !fUsingAUX) fApp->Run(true);
+  if (!fLive && fUsingAUX) gSystem->ProcessEvents();
+  if (!fLive && !fUsingAUX) fApp->Run(false);
 
   
 
