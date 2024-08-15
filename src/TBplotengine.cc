@@ -12,6 +12,7 @@ void TBplotengine::init() {
 
   fIsFirst = true;
   fUsingAUX = false;
+  gStyle->SetPalette(kRainBow);
 
   if (fCaseName == "single") {
 
@@ -22,7 +23,6 @@ void TBplotengine::init() {
      	fLeg->SetTextFont(42);
     }
 
-    gStyle->SetPalette(kRainBow);
 
     for (int i = 0; i < fNametoPlot.size(); i++) {
       // std::string aName = fUtility.GetName(aCID);
@@ -528,6 +528,7 @@ void TBplotengine::Update() {
     }
   } else if (fCaseName == "heatmap") {
 
+    f2DHistCeren->SetTitle((TString)"CERENKOV - " + std::to_string((int)fPlotter_Ceren.at(0).hist1D->GetEntries()));
     for (int i = 0; i < fPlotter_Ceren.size(); i++) {
       f2DHistCeren->SetBinContent(fPlotter_Ceren.at(i).info.row, fPlotter_Ceren.at(i).info.col, (int)fPlotter_Ceren.at(i).hist1D->GetMean());
 
@@ -538,6 +539,8 @@ void TBplotengine::Update() {
       //           << " " << fPlotter_Ceren.at(i).hist1D->GetMean() << std::endl;
 
     }
+
+    f2DHistScint->SetTitle((TString)"SCINTILLATION - " + std::to_string((int)fPlotter_Scint.at(0).hist1D->GetEntries()));
     for (int i = 0; i < fPlotter_Scint.size(); i++) {
       f2DHistScint->SetBinContent(fPlotter_Scint.at(i).info.row, fPlotter_Scint.at(i).info.col, (int)fPlotter_Scint.at(i).hist1D->GetMean());
 
@@ -625,14 +628,14 @@ void TBplotengine::Update() {
 
   // std::cout << fLive << " " << fUsingAUX << std::endl;
 
-  // if (fLive && fUsingAUX) gSystem->ProcessEvents();
+  if (fLive && fUsingAUX) gSystem->ProcessEvents();
   if (fLive && !fUsingAUX) gSystem->ProcessEvents();
   if (!fLive && fUsingAUX) gSystem->ProcessEvents();
   if (!fLive && !fUsingAUX) fApp->Run(false);
 
 
 
-  gSystem->Sleep(1000);
+  gSystem->Sleep(5000);
 
   if (fLive)
     if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)

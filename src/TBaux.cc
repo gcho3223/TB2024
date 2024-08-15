@@ -78,7 +78,7 @@ void TBaux::init() {
   fFrameTop->SetStats(0);
   fFrameBot->SetStats(0);
 
-  fCanvas = new TCanvas("fCanvas_Aux", "fCanvas_Aux", 1900, 1000);
+  fCanvas = new TCanvas("fCanvas_Aux", "fCanvas_Aux", 2700, 1400);
   fCanvas->Divide(3, 2);
 
   fCanvas->cd(1)->SetRightMargin(0.13);

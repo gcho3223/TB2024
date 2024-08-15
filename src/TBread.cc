@@ -518,10 +518,14 @@ TBevt<T> TBread<T>::GetAnEvent()
   for (int i = 0; i < fMIDMap.size(); i++)
     anEvent.insert(std::make_pair(fMIDMap.at(i), fFileMap.at(fMIDMap.at(i))->ReadEvent()));
 
-  int ref_event = fFileMap.at(fMIDMap.at(0))->GetTotalEventNum();
+  int ref_event_num = anEvent.at(fMIDMap.at(0)).evt();
   for (int i = 1; i < fMIDMap.size(); i++)
-    if (fFileMap.at(fMIDMap.at(i))->GetTotalEventNum() != ref_event)
+    if (anEvent.at(fMIDMap.at(i)).evt() != ref_event_num)
       throw std::runtime_error(ANSI.RED + ANSI.BOLD + "TBread<T>::GetAnEvent() - event num does not match between MIDs : " + std::to_string(fMIDMap.at(i)) + ANSI.END);
+  
+  // int ref_test = anEvent.at(fMIDMap.at(0)).evt();
+  // for(int i = 1; i < fMIDMap.size(); i++)
+  //  std::cout << fMIDMap.at(0) << " " << i << " " << fMIDMap.at(i) << " " << ref_test << " " << anEvent.at(fMIDMap.at(i)).evt() << std::endl;
 
   // for (auto aMID : anEvent) {
   //   std::cout << aMID.first << " " << aMID.second.mid() << std::endl;
