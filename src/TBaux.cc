@@ -220,8 +220,8 @@ void TBaux::Draw() {
   fCanvas->cd(6);
   fMC->Draw("colz");
 
-  gSystem->ProcessEvents();
-  gSystem->Sleep(3000);
+  // gSystem->ProcessEvents();
+  gSystem->Sleep(1000);
 }
 
 void TBaux::SetMaximum() {
@@ -304,6 +304,7 @@ void TBaux::Update() {
   if (fIsFirst) fIsFirst = false;
 
   SaveAs("");
+  fCanvas->cd();
   fCanvas->Update();
   fCanvas->Pad()->Draw();
 
@@ -313,12 +314,13 @@ void TBaux::Update() {
   //   // gSystem->ProcessEvents();
   //   fApp->Run(true);
   // }
+  //
 
-  if (fLive) fApp->Run(false);
+  // std::cout << " before plotting " << std::endl;
+  // gSystem->Sleep(1000);
+  //
+  if (fLive) gSystem->ProcessEvents();
   if (!fLive) fApp->Run(false);
-
-
-
 
   gSystem->Sleep(1000);
 }

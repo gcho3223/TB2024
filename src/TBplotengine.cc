@@ -22,7 +22,7 @@ void TBplotengine::init() {
      	fLeg->SetTextFont(42);
     }
 
-    gStyle->SetPalette(kVisibleSpectrum);
+    gStyle->SetPalette(kRainBow);
 
     for (int i = 0; i < fNametoPlot.size(); i++) {
       // std::string aName = fUtility.GetName(aCID);
@@ -155,7 +155,7 @@ void TBplotengine::init_single_module() {
 
       if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
         fPlotter_Scint.at(i - 1).SetPlot(new TH1D((TString)(aSName), ";PeakADC;nEvents", 288, -512., 4096.));
-    
+
       fPlotter_Scint.at(i - 1).hist1D->SetLineWidth(2);
       fPlotter_Scint.at(i - 1).hist1D->SetLineColor(kRed);
     }
@@ -478,8 +478,8 @@ void TBplotengine::Draw() {
     }
   }
 
-  gSystem->ProcessEvents();
-  gSystem->Sleep(3000);
+  // if (fUsingAUX) gSystem->ProcessEvents();
+  gSystem->Sleep(1000);
 }
 
 void TBplotengine::Update() {
@@ -492,17 +492,20 @@ void TBplotengine::Update() {
     if (fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC || fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
       SetMaximum();
 
+    fCanvas->cd();
     if (fIsFirst) {
       fIsFirst = false;
       if (fCalcInfo == TBplotengine::CalcInfo::kOverlay) {
+        fCanvas->cd();
         fPlotter_Ceren.at(0).hist2D->Draw("colz");
 
       } else {
+        fCanvas->cd();
         fMainFrame->Draw();
 
         double stat_height = (1. - 0.2) / (double)fPlotter_Ceren.size();
         for (int i = 0; i < fPlotter_Ceren.size(); i++) {
-
+          fCanvas->cd();
           fPlotter_Ceren.at(i).hist1D->Draw("Hist & sames");
 
           if (fCalcInfo == TBplotengine::CalcInfo::kIntADC || fCalcInfo == TBplotengine::CalcInfo::kPeakADC) {
@@ -517,8 +520,10 @@ void TBplotengine::Update() {
           }
         }
 
-        if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc)
+        if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
+          fCanvas->cd();
           fLeg->Draw("same");
+        }
       }
     }
   } else if (fCaseName == "heatmap") {
@@ -611,18 +616,21 @@ void TBplotengine::Update() {
   }
 
   SaveAs("");
+  fCanvas->cd();
   fCanvas->Update();
   fCanvas->Pad()->Draw();
 
   // if (fUsingAUX) gSystem->ProcessEvents();
   // else           fApp->Run(false);
 
-  if (fLive && fUsingAUX) gSystem->ProcessEvents();
-  if (fLive && !fUsingAUX) fApp->Run(true);
+  // std::cout << fLive << " " << fUsingAUX << std::endl;
+
+  // if (fLive && fUsingAUX) gSystem->ProcessEvents();
+  if (fLive && !fUsingAUX) gSystem->ProcessEvents();
   if (!fLive && fUsingAUX) gSystem->ProcessEvents();
   if (!fLive && !fUsingAUX) fApp->Run(false);
 
-  
+
 
   gSystem->Sleep(1000);
 
