@@ -297,7 +297,6 @@ void TBmonit<T>::LoopAfterRun() {
 
   std::chrono::time_point time_begin = std::chrono::system_clock::now();
   for (int i = 0; i < fMaxEvent; i++) {
-
     if (i > 0 && i % 10 == 0) {
 
       std::chrono::duration time_taken = std::chrono::system_clock::now() - time_begin; // delete
@@ -314,7 +313,6 @@ void TBmonit<T>::LoopAfterRun() {
     }
 
     TBevt<TBwaveform> anEvent = readerWave.GetAnEvent();
-
     if (fAuxCut)
       if (!fAux.IsPassing(anEvent))
         continue;
@@ -322,6 +320,7 @@ void TBmonit<T>::LoopAfterRun() {
     fPlotter.Fill(anEvent);
     if (fAuxPlotting)
       fAux.Fill(anEvent);
+    
   }
   fPlotter.Update();
   if (fAuxPlotting)
