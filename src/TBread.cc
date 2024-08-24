@@ -5,7 +5,6 @@
 
 #include <stdexcept>
 #include <chrono>
-#include <format>
 
 #include "TSystem.h"
 #include "TFile.h"
