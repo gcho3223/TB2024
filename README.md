@@ -42,6 +42,20 @@ source envset.sh
 ./compile.sh produceHist_ATS.cc
 # -- run 10482: calibration run (10000 events), 60 GeV e+ beam @M5T1
 ./produceHist_ATS 10482 100
+
+# -- event loop
+./compile.sh eventLoop.cc
+./eventLoop 10482 100
+
+```
+
+### condor submission
+
+```bash
+cd condor
+# -- open condorSubmit.py and adjust parameters
+python condorSubmit.py
+condor_submit condorSub.txt
 ```
 
 

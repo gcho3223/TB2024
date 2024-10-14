@@ -12,6 +12,8 @@ public:
     return iter->second;
   }
 
+  int nModule() { return nTotModule_; }
+
 private:
   int nTotModule_;
   std::map<int, DRCModule> map_module_;
@@ -23,7 +25,7 @@ private:
     for(int i=0; i<nTotModule_; ++i) {
       int i_module = i+1; // -- start from 1
       // std::cout << "module " << i_module << std::endl;
-      
+
       map_module_.insert( std::make_pair(i_module, DRCModule(util, i_module)) );
     }
   }
