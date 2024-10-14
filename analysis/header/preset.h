@@ -1,6 +1,7 @@
 // -- define basic values used over the analysis
+#pragma once
 
-#include <pair>
+#include <utility> // -- include pair
 
 namespace TB2024 {
   int nADCBin = 1000;

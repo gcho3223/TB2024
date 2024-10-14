@@ -1,18 +1,20 @@
 #include "header/detector/DRC.h"
 
 #include "function.h"
+#include "header/commonTool.h"
 
 #include <filesystem>
 #include <iostream>
 
 namespace fs = std::filesystem;
 
-
 int main(int argc, char** argv) {
   // -- initial value -- //
   int nTotModule = 9;
   int nTower = 4;
   /////////////////////////
+  TB2024::Timer timer;
+  timer.Start();
 
   int fRunNum = std::stoi(argv[1]);
   int fMaxEvent = std::stoi(argv[2]);
@@ -46,7 +48,7 @@ int main(int argc, char** argv) {
 
       for(int i_tower=0; i_tower<nTower; ++i_tower) {
         int towerNum = i_tower+1;
-        theDRC.Get_Module(moduleNum).Get_Tower(towerNum).Count_Wave();
+        theDRC.Get_Module(moduleNum).Get_Tower(towerNum).Count_Wave(anEvt);
       } // -- end of tower loop
     } // -- end of module loop
   } // -- end of event loop
@@ -64,4 +66,6 @@ int main(int argc, char** argv) {
     } // -- end of tower loop
   } // -- end of module loop
   outputRoot->Close(); 
+
+  timer.PrintRunTime();
 }

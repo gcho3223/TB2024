@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+#include <numeric>
 
 #include "TROOT.h"
 #include "TStyle.h"

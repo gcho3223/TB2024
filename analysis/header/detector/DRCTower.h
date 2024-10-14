@@ -1,4 +1,3 @@
-#include "../preset.h"
 #include "DRCFiber.h"
 
 #include <map>
@@ -25,7 +24,7 @@ public:
       pair.second.Count_Wave(anEvt);
   }
 
-  std::vector<short> Get_ATS(std::string fiber) {
+  std::vector<double> Get_ATS(std::string fiber) {
     return Get_Fiber(fiber).Get_ATS(); 
   }
 
@@ -39,7 +38,7 @@ private:
     BasicCheck();
 
     // -- init. DRCFiber
-    vector<std::string> vec_fiberType = {"c", "s"};
+    std::vector<std::string> vec_fiberType = {"c", "s"};
     for( auto& type : vec_fiberType )
       map_fiber_.insert( std::make_pair(type, DRCFiber(util, moduleNum_, towerNum_, type)) );
   }
@@ -49,6 +48,6 @@ private:
       throw std::invalid_argument("[DRCTower::BasicCheck] moduleNum = " + std::to_string(moduleNum_) + " > 11!");
 
     if( moduleNum_ <= 9 && towerNum_ > 4 )
-      throw std::invalid_argument("[DRCTower::BasicCheck] towerNum_ = " + std::to_string(towerNum__) + " > 4!");
+      throw std::invalid_argument("[DRCTower::BasicCheck] towerNum_ = " + std::to_string(towerNum_) + " > 4!");
   }
 };

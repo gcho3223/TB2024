@@ -23,7 +23,8 @@ private:
 
     for(int i=0; i<nTower; ++i) {
       int i_tower = i+1; // -- start from 1
-      map_tower_.insert( std::make_pair(i_tower, DRCTower(util, moduleNum, i_tower)) );
+      // std::cout << "tower " << i_tower << std::endl;
+      map_tower_.insert( std::make_pair(i_tower, DRCTower(util, moduleNum_, i_tower)) );
     }
   }
 };

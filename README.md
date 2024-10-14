@@ -25,16 +25,23 @@ git clone git@github.com:swkim95/TB2024.git -b TB2024_centos
 ```bash
 git clone git@github.com:KyeongPil-Lee/TB2024.git -b EMStudy
 cd TB2024
-source buildNinstall_centos.sh
-source envset_centos.sh
+source buildNinstall.sh
+source envset.sh
 ```
 
 ### after the first setup
 
 ```bash
-source envset_centos.sh
+source envset.sh
+```
+
+### test run
+
+```bash
 # -- compile a code
-./compile_centos.sh TBanalysis_ex
+./compile.sh produceHist_ATS.cc
+# -- run 10482: calibration run (10000 events), 60 GeV e+ beam @M5T1
+./produceHist_ATS 10482 100
 ```
 
 
