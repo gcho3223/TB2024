@@ -10,3 +10,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_DIR_PATH/lib64
 export DYLD_LIBRARY_PATH=$INSTALL_DIR_PATH/lib64
 export PYTHONPATH=$PYTHONPATH:$INSTALL_DIR_PATH/lib64
 export YAMLPATH=/cvmfs/sft.cern.ch/lcg/releases/yamlcpp/0.6.3-d05b2/x86_64-centos7-gcc11-opt/lib
+
+# -- for postprocess codes
+export TB2024PPPATH=$PWD/analysis/postProcess
+export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$TB2024PPPATH
