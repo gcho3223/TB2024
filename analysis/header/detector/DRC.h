@@ -14,6 +14,19 @@ public:
 
   int nModule() { return nTotModule_; }
 
+  void Update(TBevt<TBwaveform>* anEvt) {
+    for(auto& pair : map_module_ )
+      pair.second.Update(anEvt);
+  }
+
+  double Get_EnergySum(TString fiberType, bool applySF=kTRUE) {
+    double sum = 0;
+    for(auto& pair : map_module_ )
+      sum += pair.second.Get_EnergySum(fiberType, applySF);
+
+    return sum;
+  }
+
 private:
   int nTotModule_;
   std::map<int, DRCModule> map_module_;

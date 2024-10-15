@@ -7,6 +7,8 @@ public:
   DRCTower(TButility& util, int moduleNum, int towerNum):
   moduleNum_(moduleNum), towerNum_(towerNum) { Init(util); }
 
+  TString Tag() { return tag_; }
+
   DRCFiber& Get_Fiber(std::string fiber) {
     auto iter = map_fiber_.find(fiber);
     if( iter == map_fiber_.end() )
@@ -15,27 +17,37 @@ public:
     return iter->second;
   }
 
-  std::vector<short> Get_Wave(TBevt<TBwaveform>* anEvt, std::string fiber) { 
-    return Get_Fiber(fiber).Get_Wave(anEvt); 
-  }
-
-  void Count_Wave(TBevt<TBwaveform>* anEvt) {
+  void Update(TBevt<TBwaveform>* anEvt) {
     for(auto& pair : map_fiber_ )
-      pair.second.Count_Wave(anEvt);
+      pair.second.Update(anEvt);
   }
 
-  std::vector<double> Get_ATS(std::string fiber) {
-    return Get_Fiber(fiber).Get_ATS(); 
+  double Get_EnergySum(TString fiberType, bool applySF=kTRUE) {
+    double sum = 0;
+
+    if( fiberType == "c" || fiberType == "s" ) 
+      sum = map_fiber_[fiberType.Data()].Get_Energy(applySF);
+    else if( fiberType == "all" ) { // -- S+C;
+      for(auto& pair : map_fiber_ )
+        sum += pair.second.Get_Energy(applySF);
+    }
+    else
+      throw std::invalid_argument("[DRCTower::Get_EnergySum] fiberType = " + fiberType + " is not supported");
+
+    return sum;
   }
 
 private:
   int moduleNum_ = 0;
   int towerNum_ = 0;
+  TString tag_ = "undefined";
 
   std::map<std::string, DRCFiber> map_fiber_;
 
   void Init(TButility& util) {
     BasicCheck();
+
+    tag_ = TString::Format("M%d-T%d", moduleNum_, towerNum_);
 
     // -- init. DRCFiber
     std::vector<std::string> vec_fiberType = {"c", "s"};

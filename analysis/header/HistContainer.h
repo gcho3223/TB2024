@@ -13,7 +13,7 @@ public:
   void Fill(TBevt<TBwaveform>* anEvt, DRC& theDRC, DWCPair& theDWCPair, AuxDetector& thePS, AuxDetector& theMC, double weight = 1.0) {
     nEvent_ += weight;
 
-    Fill_DRC(anEvt, theDRC);
+    Fill_DRC(theDRC);
 
     Fill_DWC(anEvt, theDWCPair);
     histSet_->Fill("peakADC", thePS.Tag(), thePS.Get_PeakADC(anEvt), weight);
@@ -50,7 +50,7 @@ private:
     histSet_ = new HistSet(tag_);
     histSet_->Register("intADC",  320, -20000, 300000);
     histSet_->Register("peakADC", 4096, 0, 4096);
-    // histSet_->Register("eDep", 440, -20, 200); // -- in GeV
+    histSet_->Register("eDep", 640, -20, 300); // -- in GeV
     histSet_->Register("posDiffDWC", 200, 0, 100);
 
     h2D_pos_DWC1_ = new TH2D("h2D_pos_DWC1",       "", 480, -120., 120., 480, -120., 120.); vec_hist2D_.push_back(h2D_pos_DWC1_);
@@ -66,7 +66,7 @@ private:
     }
   }
 
-  void Fill_DRC(TBevt<TBwaveform>* anEvt, DRC& theDRC, double weight = 1.0) {
+  void Fill_DRC(DRC& theDRC, double weight = 1.0) {
     for(int i_mo=0; i_mo<theDRC.nModule(); ++i_mo) {
       int moduleNum = i_mo+1;
       DRCModule& module = theDRC.Get_Module(moduleNum);
@@ -77,10 +77,34 @@ private:
         DRCFiber& fiber_c = tower.Get_Fiber("c");
         DRCFiber& fiber_s = tower.Get_Fiber("s");
 
-        histSet_->Fill("intADC", fiber_c.Tag(), fiber_c.Get_IntADC(anEvt), weight);
-        histSet_->Fill("intADC", fiber_s.Tag(), fiber_s.Get_IntADC(anEvt), weight);
+        histSet_->Fill("intADC", fiber_c.Tag(), fiber_c.Get_IntADC(), weight);
+        histSet_->Fill("intADC", fiber_s.Tag(), fiber_s.Get_IntADC(), weight);
+
+        histSet_->Fill("eDep", "noSF_"+fiber_c.Tag(), fiber_c.Get_Energy(kFALSE), weight);
+        histSet_->Fill("eDep", "noSF_"+fiber_s.Tag(), fiber_s.Get_Energy(kFALSE), weight);  
+        histSet_->Fill("eDep",         fiber_c.Tag(), fiber_c.Get_Energy(kTRUE),  weight);
+        histSet_->Fill("eDep",         fiber_s.Tag(), fiber_s.Get_Energy(kTRUE),  weight);
+
+        histSet_->Fill("eDep", "noSF_"+tower.Tag(),   tower.Get_EnergySum("all", kFALSE), weight);
+        histSet_->Fill("eDep",         tower.Tag(),   tower.Get_EnergySum("all", kTRUE),  weight);
       } // -- iter over. towers
+
+      histSet_->Fill("eDep", "noSF_"+module.Tag()+"-C", module.Get_EnergySum("c", kFALSE), weight);
+      histSet_->Fill("eDep",         module.Tag()+"-C", module.Get_EnergySum("c", kTRUE),  weight);
+      histSet_->Fill("eDep", "noSF_"+module.Tag()+"-S", module.Get_EnergySum("s", kFALSE), weight);
+      histSet_->Fill("eDep",         module.Tag()+"-S", module.Get_EnergySum("s", kTRUE),  weight);
+
+      histSet_->Fill("eDep", "noSF_"+module.Tag(), module.Get_EnergySum("all", kFALSE), weight);
+      histSet_->Fill("eDep",         module.Tag(), module.Get_EnergySum("all", kTRUE),  weight);
     } // -- iter over. modules
+
+    histSet_->Fill("eDep", "noSF_all-C", theDRC.Get_EnergySum("c", kFALSE), weight);
+    histSet_->Fill("eDep", "all-C",      theDRC.Get_EnergySum("c", kTRUE),  weight);
+    histSet_->Fill("eDep", "noSF_all-S", theDRC.Get_EnergySum("s", kFALSE), weight);
+    histSet_->Fill("eDep", "all-S",      theDRC.Get_EnergySum("s", kTRUE),  weight);
+
+    histSet_->Fill("eDep", "noSF_all", theDRC.Get_EnergySum("all", kFALSE), weight);
+    histSet_->Fill("eDep", "all",      theDRC.Get_EnergySum("all", kTRUE),  weight);
   }
 
   void Fill_DWC(TBevt<TBwaveform>* anEvt, DWCPair& theDWCPair, double weight = 1.0) {

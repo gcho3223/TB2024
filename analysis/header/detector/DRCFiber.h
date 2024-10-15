@@ -15,30 +15,39 @@
 
 class DRCFiber {
 public:
-  // -- type: c or s (C or S is also allowed)
+  DRCFiber() { }
+
+  // -- type: c or s
   DRCFiber(TButility& util, int moduleNum, int towerNum, std::string type):
   moduleNum_(moduleNum), towerNum_(towerNum), type_(type) { Init(util); }
 
-  // -- get waveform
-  std::vector<short> Get_Wave(TBevt<TBwaveform>* anEvt) {
-    return anEvt->GetData(cid_).waveform();
+  TString Tag() { return tag_; }
+
+  // -- update the member variables corresponding to this event
+  void Update(TBevt<TBwaveform>* anEvt) {
+    waveform_ = Get_Waveform(anEvt);
+    peakADC_  = GetPeak(waveform_, intRange_.first, intRange_.second);
+    intADC_   = GetInt(waveform_, intRange_.first, intRange_.second);
+    energy_noSF_ = intADC_ * calibConst_;
+    // -- remove negative values
+    if( energy_noSF_ < 0 ) energy_noSF_ = 0;
+
+    energy_ = energy_noSF_ * sf_;
   }
 
+  std::vector<short> Get_Wave() { return waveform_; }
+  double Get_PeakADC() { return peakADC_; }
+  double Get_IntADC()  { return intADC_; }
+  double Get_Energy(bool applySF=kTRUE) { return applySF ? energy_ : energy_noSF_; }
+
   // -- count the waveform of this event (for average time structure at the end)
-  void Count_Wave(TBevt<TBwaveform>* anEvt) {
-    std::vector<short> waveform_thisEvt = Get_Wave(anEvt);
-    ats_.Fill(waveform_thisEvt);
-  }
+  void Count_Wave() { ats_.Fill(waveform_); }
 
   // -- ATS = averaged time structure
   // -- should be called after processing all events (with Count_Wave() per event)
   std::vector<double> Get_ATS() { return ats_.Get(); }
 
   TH1D* GetHist_ATS() { return ats_.GetHist(tag_); }
-
-  TString Tag() { return tag_; }
-  double Get_PeakADC(TBevt<TBwaveform>* anEvt) { return GetPeak(Get_Wave(anEvt), intRange_.first, intRange_.second); }
-  double Get_IntADC(TBevt<TBwaveform>* anEvt) { return GetInt(Get_Wave(anEvt), intRange_.first, intRange_.second); }
 
 private:
   int moduleNum_ = 0;
@@ -51,6 +60,16 @@ private:
   ATS ats_; // -- average time structure
 
   std::pair<int, int> intRange_;
+  double calibConst_ = -1;
+  double sf_ = 1.0;
+
+  // -- values for a given event
+  // -- updated whenever Update() is called
+  std::vector<short> waveform_;
+  double peakADC_;
+  double intADC_;
+  double energy_noSF_;
+  double energy_;
 
   void Init(TButility& util) {
     BasicCheck();
@@ -60,6 +79,11 @@ private:
     ats_ = ATS();
 
     intRange_ = TB2024::GetIntRange_DRC(tag_);
+    calibConst_ = TB2024::map_calibConst[tag_];
+    if( calibConst_ <= 0 )
+      throw std::invalid_argument("no calib. const. for the fiber = " + tag_);
+
+    sf_ = TB2024::map_sf_[type_];
   }
 
   TString MakeTag() {
@@ -72,5 +96,10 @@ private:
   void BasicCheck() {
     if( !(type_ == "c" || type_ == "s") )
       throw std::invalid_argument("[DRCFiber::BasicCheck] no fiber corresponding to " + type_);
+  }
+
+  // -- get waveform
+  std::vector<short> Get_Waveform(TBevt<TBwaveform>* anEvt) {
+    return anEvt->GetData(cid_).waveform();
   }
 };

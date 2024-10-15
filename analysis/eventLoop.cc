@@ -61,6 +61,11 @@ int main(int argc, char** argv) {
     printProgress(i_ev, fMaxEvent);
     evtChain->GetEntry(i_ev); // Get event
 
+    // -- update the internal values for this event
+    // -- it boosts the processing time a lot
+    // -- FIXME: update other aux. detectors as well with the same structure
+    theDRC.Update(anEvt);
+
     hist_noCut.Fill( anEvt, theDRC, theDWCPair, thePS, theMC );
 
     // -- event selection
