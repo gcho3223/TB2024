@@ -69,6 +69,10 @@ error       = {condorDir_}/job.$(ClusterId).$(ProcId).err
 log         = {condorDir_}/job.$(ClusterId).$(ProcId).log
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
+
++JobFlavour = "longlunch"
+requirements = (Machine != "cluster341.knu.ac.kr" && Machine != "cluster275.knu.ac.kr" && Memory >= 2048 && Cpus >= 1)
+
 """.format(condorDir_=condorDir)
   )
 

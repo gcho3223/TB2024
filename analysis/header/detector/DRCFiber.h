@@ -83,7 +83,7 @@ private:
     if( calibConst_ <= 0 )
       throw std::invalid_argument("no calib. const. for the fiber = " + tag_);
 
-    sf_ = TB2024::map_sf_[type_];
+    sf_ = TB2024::map_sf[type_];
   }
 
   TString MakeTag() {

@@ -27,6 +27,21 @@ public:
     return sum;
   }
 
+  // -- map_towerNum: (moduleNum, vec_towerNum) pairs
+  double Get_PartialEnergySum(std::map<int, std::vector<int>>& map_towerNum, TString fiberType, bool applySF=kTRUE) {
+    double sum = 0;
+    for(auto& pair : map_towerNum ) {
+      int moduleNum = pair.first;
+      DRCModule& module_i = Get_Module(moduleNum);
+
+      const std::vector<int>& vec_towerNum = pair.second;
+      for(auto& towerNum : vec_towerNum )
+        sum += module_i.Get_Tower(towerNum).Get_EnergySum(fiberType, applySF);
+    }
+
+    return sum;
+  }
+
 private:
   int nTotModule_;
   std::map<int, DRCModule> map_module_;

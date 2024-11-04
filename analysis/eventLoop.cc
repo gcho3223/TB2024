@@ -1,6 +1,8 @@
 #include "header/HistContainer.h"
 #include "header/commonTool.h"
 
+#include "header/customizer.h"
+
 #include <filesystem>
 #include <iostream>
 
@@ -9,6 +11,7 @@ namespace fs = std::filesystem;
 int main(int argc, char** argv) {
   // -- initial value -- //
   int nTotModule = 9;
+  bool save_cutFlowHist = false;
   /////////////////////////
 
   TB2024::Timer timer;
@@ -16,6 +19,9 @@ int main(int argc, char** argv) {
 
   int fRunNum = std::stoi(argv[1]);
   int fMaxEvent = std::stoi(argv[2]);
+
+  // -- customize preset values, if exist
+  TB2024::Customize_Preset();
 
   // -- histograms
   HistContainer hist_noCut("noCut");
@@ -66,14 +72,14 @@ int main(int argc, char** argv) {
     // -- FIXME: update other aux. detectors as well with the same structure
     theDRC.Update(anEvt);
 
-    hist_noCut.Fill( anEvt, theDRC, theDWCPair, thePS, theMC );
+    if( save_cutFlowHist ) hist_noCut.Fill( anEvt, theDRC, theDWCPair, thePS, theMC );
 
     // -- event selection
     if( !theDWCPair.Pass(anEvt) ) continue;   
-    hist_DWC.Fill( anEvt, theDRC, theDWCPair, thePS, theMC );
+    if( save_cutFlowHist ) hist_DWC.Fill( anEvt, theDRC, theDWCPair, thePS, theMC );
 
     if( !thePS.Pass(anEvt) ) continue;
-    hist_DWCPS.Fill(anEvt, theDRC, theDWCPair, thePS, theMC);
+    if( save_cutFlowHist ) hist_DWCPS.Fill(anEvt, theDRC, theDWCPair, thePS, theMC);
 
     if( !theMC.Pass(anEvt) ) continue;
     hist_DWCPSMC.Fill(anEvt, theDRC, theDWCPair, thePS, theMC);
@@ -84,9 +90,11 @@ int main(int argc, char** argv) {
   TFile* outputRoot = new TFile(outFile.c_str(), "RECREATE");
   outputRoot->cd();
 
-  hist_noCut.Write();
-  hist_DWC.Write();
-  hist_DWCPS.Write();
+  if( save_cutFlowHist ) {
+    hist_noCut.Write();
+    hist_DWC.Write();
+    hist_DWCPS.Write();
+  }
   hist_DWCPSMC.Write();
 
   outputRoot->Close();

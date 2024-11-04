@@ -46,6 +46,15 @@ private:
   TH2D* h2D_posCorrel_x_;
   TH2D* h2D_posCorrel_y_;
 
+  // -- for patial energy sum
+  // -- module & towerNum near M8T2
+  std::map<int, std::vector<int>> map_towerNum_nearM8T2_ = {
+    {5, {3, 4} }, // -- module 5, tower 3 and 4
+    {6, {3} },
+    {8, {1, 2, 3, 4} },
+    {9, {1, 3} },
+  };
+
   void Init() {
     histSet_ = new HistSet(tag_);
     histSet_->Register("intADC",  320, -20000, 300000);
@@ -105,6 +114,15 @@ private:
 
     histSet_->Fill("eDep", "noSF_all", theDRC.Get_EnergySum("all", kFALSE), weight);
     histSet_->Fill("eDep", "all",      theDRC.Get_EnergySum("all", kTRUE),  weight);
+
+    // -- partial energy sum
+    // -- near M8T2
+    histSet_->Fill("eDep", "noSF_nearM8T2-C", theDRC.Get_PartialEnergySum(map_towerNum_nearM8T2_, "c",   kFALSE), weight);
+    histSet_->Fill("eDep", "nearM8T2-C",      theDRC.Get_PartialEnergySum(map_towerNum_nearM8T2_, "c",   kTRUE),  weight);
+    histSet_->Fill("eDep", "noSF_nearM8T2-S", theDRC.Get_PartialEnergySum(map_towerNum_nearM8T2_, "s",   kFALSE), weight);
+    histSet_->Fill("eDep", "nearM8T2-S",      theDRC.Get_PartialEnergySum(map_towerNum_nearM8T2_, "s",   kTRUE),  weight);
+    histSet_->Fill("eDep", "noSF_nearM8T2",   theDRC.Get_PartialEnergySum(map_towerNum_nearM8T2_, "all", kFALSE), weight);
+    histSet_->Fill("eDep", "nearM8T2",        theDRC.Get_PartialEnergySum(map_towerNum_nearM8T2_, "all", kTRUE),  weight);
   }
 
   void Fill_DWC(TBevt<TBwaveform>* anEvt, DWCPair& theDWCPair, double weight = 1.0) {

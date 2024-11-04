@@ -134,7 +134,7 @@ namespace TB2024 {
     {"M9-T4-S", 0.000588},
   };
 
-  std::map<TString, double> map_sf_ = {
+  std::map<TString, double> map_sf = {
     {"c", 0.771253},
     {"s", 0.778751},
   };
