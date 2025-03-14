@@ -50,6 +50,7 @@ if __name__ == '__main__':
   # mode = "calib"
   # mode = "muBeam"
   mode = "emScan"
+  
   # macro = "draw_DWC"
   # macro = "produceHist_ATS"
   macro = "eventLoop"

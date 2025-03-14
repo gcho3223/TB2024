@@ -9,7 +9,7 @@ namespace TB2024 {
     TB2024::map_sf.insert(
       { 
         // -- near M8T2 only
-        {"c", 0.863079},
+        {"c", 0.866479},
         {"s", 0.831340},
       }
     );

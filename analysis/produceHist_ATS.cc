@@ -55,12 +55,17 @@ int main(int argc, char** argv) {
     evtChain->GetEntry(i_ev); // Get event
     nProcEvent++;
 
+    // -- update the internal values for this event
+    // -- it boosts the processing time a lot
+    theDRC.Update(anEvt);
+
     for(int i_mo=0; i_mo<nTotModule; ++i_mo) {
       int moduleNum = i_mo+1;
 
       for(int i_tower=0; i_tower<nTower; ++i_tower) {
         int towerNum = i_tower+1;
-        theDRC.Get_Module(moduleNum).Get_Tower(towerNum).Count_Wave(anEvt);
+        theDRC.Get_Module(moduleNum).Get_Tower(towerNum).Get_Fiber("c").Count_Wave();
+        theDRC.Get_Module(moduleNum).Get_Tower(towerNum).Get_Fiber("s").Count_Wave();
       } // -- end of tower loop
     } // -- end of module loop
 
@@ -72,6 +77,7 @@ int main(int argc, char** argv) {
     thePS.Count_Wave(anEvt);
     theMC.Count_Wave(anEvt);
   } // -- end of event loop
+
 
   std::string outFile = "./Avg/Avg_Run_" + std::to_string(fRunNum) + ".root";
   TFile* outputRoot = new TFile(outFile.c_str(), "RECREATE");

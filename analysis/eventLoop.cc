@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
   int fRunNum = std::stoi(argv[1]);
   int fMaxEvent = std::stoi(argv[2]);
 
-  // -- customize preset values, if exist
+  // -- defined in header/customizer.h: customize preset values, if exist
   TB2024::Customize_Preset();
 
   // -- histograms
