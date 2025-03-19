@@ -8,11 +8,13 @@ git clone git@github.com:KyeongPil-Lee/TB2024.git -b TB2024Paper
 cd TB2024
 source buildNinstall.sh
 source envset.sh
+cd analysis # -- directory with the analysis codes
 ```
 
 ### After the first setup
 ```bash
 source envset.sh
+cd analysis # -- directory with the analysis codes
 ```
 
 ### Examples
@@ -84,8 +86,9 @@ condor_submit condorSub.txt
   * `HistSet.h`: class for managing a set of arbitrary histograms (used in `HistContainer.h`)
 
 ### PostProcessing codes (under `./postProcess`)
-Codes to post-process the results of the event loop
-(explanation will be updated soon)
+Codes to post-process the results of the event loop.
+
+Dedicated explanation is in `./postProcess/README.md`
 
 
 ## Reference
