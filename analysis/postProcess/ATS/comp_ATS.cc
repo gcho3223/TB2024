@@ -13,6 +13,14 @@ public:
       ProducePlot_CompATS_PerModule(moduleNum, "S");
     }
 
+    for(int i=0; i<9; ++i) {
+      int moduleNum = i+1;
+      for(int j=0; j<4; ++j) {
+        int towerNum = j+1;
+        ProducePlot_CompATS_PerTower(moduleNum, towerNum);
+      }
+    }
+
     // -- ATS in each calibration run (to check consistency over runs)
     for(auto& pair : map_calibRun_ )
       ProducePlot_ATS_PS(pair.second, pair.first);
@@ -28,6 +36,39 @@ private:
 
   void Init() {
     map_calibRun_ = TB2024::GetMap_CalibRun();
+  }
+
+  void ProducePlot_CompATS_PerTower(int moduleNum, int towerNum) {
+    TH1D* h_C   = GetATSHist(moduleNum, 1, "C");
+    TH1D* h_S   = GetATSHist(moduleNum, 2, "S");
+
+    TString canvasName = TString::Format("compATS_perT_M%d-T%d", moduleNum, towerNum);
+    PlotTool::HistCanvas* canvas = new PlotTool::HistCanvas(canvasName, 0, 0);
+    canvas->SetTitle("Time bin", "ADC");
+
+    canvas->Register(h_C, "Cerenkov (C)", kBlue); // -- first element: denominator of the ratio
+    canvas->Register(h_S, "Scintillation (S)", kRed);
+
+    // canvas->SetLegendColumn(2);
+    canvas->SetLegendPosition(0.50, 0.16, 0.95, 0.40);
+
+    // canvas->SetRangeX(minX, maxX);
+    canvas->SetRangeY(2000, 4000);
+    // canvas->SetRangeRatio(0.7, 1.3);
+    // canvas->SetAutoRangeY();
+    // canvas->SetAutoRangeRatio();
+    
+    canvas->RegisterLatex(0.14, 0.96, 62, 0.8, "TB2024");
+    canvas->RegisterLatex(0.73, 0.96, 62, 0.6, "e+ beam (60 GeV)");
+
+    TString towerInfo = TString::Format("M%d-T%d", moduleNum, towerNum);
+    canvas->RegisterLatex(0.16, 0.91, 42, 0.6, towerInfo); // arguments: x, y, font type, font size, text
+
+    canvas->RemoveRatioError(); // remove error in the ratio (useful when the error is meaningless)
+
+    // canvas->SetSavePath("./output"); // -- path to be saved (default: "./")
+
+    canvas->Draw("HIST L");
   }
 
   void ProducePlot_CompATS_PerModule(int moduleNum, TString fiberType) {

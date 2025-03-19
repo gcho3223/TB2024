@@ -9,6 +9,20 @@ public:
 
   void Set_PlotPath(TString path) { plotPath_ = path; }
 
+  void NoFit(bool noFit=kTRUE) { noFit_ = noFit; }
+
+  void Use_PartialTower(TString tag_partialTower) {
+    use_partialTower_ = kTRUE;
+    tag_partialTower_ = tag_partialTower;
+    if( (tag_partialTower_ == "nearM8T2" && centerTowerTag_ != "M8-T2") || 
+        (tag_partialTower_ == "nearM9T1" && centerTowerTag_ != "M9-T1") ||
+        (tag_partialTower_ == "nearM5T1" && centerTowerTag_ != "M5-T1") ||
+        (tag_partialTower_ == "nearM5T3" && centerTowerTag_ != "M5-T3") ) {
+      printf("[EMResolution::Use_PartialTower] tag for partial tower is %s, but reference tower is %s!\n", tag_partialTower_.Data(), centerTowerTag_.Data());
+      throw std::invalid_argument("tower inconsistency is found");
+    }
+  }
+
   void Produce() {
     Init();
 
@@ -29,6 +43,12 @@ private:
   TString centerTowerTag_;
   std::vector<int> vec_run_;
   std::vector<double> vec_energy_;
+
+  bool noFit_ = kFALSE; // -- default: do gaussian fit
+
+  // -- when partial # towers are used, not full 3x3 modules
+  bool use_partialTower_ = kFALSE;
+  TString tag_partialTower_ = "undefined"; // -- tag for hist. name (e.g. "nearM8T2" if the hist. = h_eDep_nearM8T2_DWCPSMC)
 
   void Init() {
     vec_energy_ = TB2024::vec_emScanE;
@@ -56,21 +76,21 @@ private:
 
   void ProducePlot_Resol_vs_E() {
     TF1* resolFunc_C = new TF1("resolFunc_C", "TMath::Sqrt( ([0]/x)*([0]/x) + ([1]/TMath::Sqrt(x))*([1]/TMath::Sqrt(x))+[2]*[2] )", 0, 120);
-    resolFunc_C->SetParameter(0, 0);
+    resolFunc_C->SetParameter(0, 1);
     resolFunc_C->SetParameter(1, 0.2);
     resolFunc_C->SetParameter(2, 0.05);
     // resolFunc_C->SetParLimits(1, 0, 1e10); // -- positive
     resolFunc_C->SetLineColor(kBlue);
 
     TF1* resolFunc_S = new TF1("resolFunc_S", "TMath::Sqrt( ([0]/x)*([0]/x) + ([1]/TMath::Sqrt(x))*([1]/TMath::Sqrt(x))+[2]*[2] )", 0, 120);
-    resolFunc_S->SetParameter(0, 0);
+    resolFunc_S->SetParameter(0, 1);
     resolFunc_S->SetParameter(1, 0.2);
     resolFunc_S->SetParameter(2, 0.05);
     // resolFunc_S->SetParLimits(1, 0, 1e10); // -- positive
     resolFunc_S->SetLineColor(kRed);
 
     TF1* resolFunc_sum = new TF1("resolFunc_sum", "TMath::Sqrt( ([0]/x)*([0]/x) + ([1]/TMath::Sqrt(x))*([1]/TMath::Sqrt(x))+[2]*[2] )", 0, 120);
-    resolFunc_sum->SetParameter(0, 0);
+    resolFunc_sum->SetParameter(0, 1);
     resolFunc_sum->SetParameter(1, 0.2);
     resolFunc_sum->SetParameter(2, 0.05);
     // resolFunc_sum->SetParLimits(1, 0, 1e10); // -- positive
@@ -91,7 +111,8 @@ private:
 
     // canvas->SetMarkerSize(2.0);
 
-    canvas->SetLegendPosition(0.24, 0.65, 0.95, 0.91);
+    if( noFit_ ) canvas->SetLegendPosition(0.16, 0.14, 0.80, 0.35);
+    else         canvas->SetLegendPosition(0.24, 0.65, 0.95, 0.91);
 
     // canvas->SetRangeX(minX, maxX);
     canvas->SetRangeY(0, 0.4);
@@ -154,12 +175,32 @@ private:
     if( fiberType == "Sum" ) histName = "h_eDep_all_DWCPSMC";
     else                     histName = TString::Format("h_eDep_all-%s_DWCPSMC", fiberType.Data());
 
+    if( use_partialTower_ )
+      histName.ReplaceAll("eDep_all", "eDep_"+tag_partialTower_);
+
     TH1D* h_eDep = PlotTool::Get_Hist(fileName, histName);
+    Double_t nEvent = h_eDep->Integral();
+    cout << "(energy, fiber) = (" << energy << ", " << fiberType << "): # events = " << nEvent << endl;
+
+    // -- from histogram values (no fit)
+    double mean   = h_eDep->GetMean();
+    double stdDev = h_eDep->GetStdDev();
+    double resol = stdDev / mean;
+    double absUnc_mean   = h_eDep->GetMeanError();
+    double absUnc_stdDev = h_eDep->GetStdDevError();
+    double absUnc_resol  = AbsUnc_AoverB(stdDev, absUnc_stdDev, mean, absUnc_mean);
+
+    // -- fit
     GausFitter fitter(h_eDep);
-    if( fiberType == "Sum" ) fitter.SetColor(kBlue);
-    fitter.Fit();
+    if( !noFit_ ) {
+      if( fiberType == "Sum" ) fitter.SetColor(kBlue);
+      fitter.Fit();
+    }
 
     TString canvasName = TString::Format("eDep_%s_energy%.0lf_run%d", fiberType.Data(), energy, run);
+    if( use_partialTower_ )
+      canvasName.ReplaceAll("eDep", "eDep_"+tag_partialTower_);
+
     PlotTool::HistCanvas* canvas = new PlotTool::HistCanvas(canvasName, 0, 0);
     canvas->SetTitle("Energy deposit [GeV]", "# events");
 
@@ -185,24 +226,56 @@ private:
     TString runInfo = TString::Format("%s channel, Run %d (EM scan @ %s, %.0lf GeV)", fiberType.Data(), run, centerTowerTag_.Data(), energy);
     canvas->RegisterLatex(0.16, 0.91, 42, 0.6, runInfo);
 
-    TString fitInfo = TString::Format("Fit results (#chi2/nDOF = %.2lf/%.0lf):", fitter.Get("chi2"), fitter.Get("nDOF"));
-    canvas->RegisterLatex(0.16, 0.87, 62, 0.6, fitInfo);
-    TString muInfo    = TString::Format("#mu = %.2lf #pm %.2lf GeV", fitter.Get("mu"), fitter.GetUnc("mu"));
-    TString sigmaInfo = TString::Format("#sigma = %.2lf #pm %.2lf GeV", fitter.Get("sigma"), fitter.GetUnc("sigma"));
-    canvas->RegisterLatex(0.16, 0.83, 42, 0.6, muInfo);
-    canvas->RegisterLatex(0.16, 0.79, 42, 0.6, sigmaInfo);
+    if( noFit_ ) {
+      TString histInfo = TString::Format("Hist. statistics (# events = %.0lf):", h_eDep->Integral(0, h_eDep->GetNbinsX()+1));
+      canvas->RegisterLatex(0.16, 0.87, 62, 0.6, histInfo);
+      TString muInfo    = TString::Format("mean = %.2lf #pm %.2lf GeV", mean, absUnc_mean);
+      TString sigmaInfo = TString::Format("std.dev. = %.2lf #pm %.2lf GeV", stdDev, absUnc_stdDev);
+      TString resolInfo = TString::Format("std.dev/mean = %.2lf #pm %.2lf", resol, absUnc_resol);
+      canvas->RegisterLatex(0.16, 0.83, 42, 0.6, muInfo);
+      canvas->RegisterLatex(0.16, 0.79, 42, 0.6, sigmaInfo);
+      canvas->RegisterLatex(0.16, 0.75, 42, 0.6, resolInfo);
+    }
+    else {
+      TString fitInfo = TString::Format("Fit results (#chi2/nDOF = %.2lf/%.0lf):", fitter.Get("chi2"), fitter.Get("nDOF"));
+      canvas->RegisterLatex(0.16, 0.87, 62, 0.6, fitInfo);
+
+      TString muInfo    = TString::Format("#mu = %.2lf #pm %.2lf GeV", fitter.Get("mu"), fitter.GetUnc("mu"));
+      TString sigmaInfo = TString::Format("#sigma = %.2lf #pm %.2lf GeV", fitter.Get("sigma"), fitter.GetUnc("sigma"));
+      TString resolInfo = TString::Format("#sigma/#mu = %.2lf #pm %.2lf", fitter.Get("resol"), fitter.GetUnc("resol"));
+      canvas->RegisterLatex(0.16, 0.83, 42, 0.6, muInfo);
+      canvas->RegisterLatex(0.16, 0.79, 42, 0.6, sigmaInfo);
+      canvas->RegisterLatex(0.16, 0.75, 42, 0.6, resolInfo);
+    }
+
+    if( use_partialTower_ ) {
+      if( tag_partialTower_.Contains("near") ) {
+        TString towerName = tag_partialTower_;
+        towerName.ReplaceAll("near", "");
+        TString sumInfo = TString::Format("Sum of the towers near %s only (9 towers)", towerName.Data());
+        canvas->RegisterLatex(0.16, 0.71, 42, 0.5, sumInfo);
+      }
+    }
 
     // canvas->RemoveRatioError(); // remove error in the ratio (useful when the error is meaningless)
 
     canvas->SetSavePath(plotPath_);
     canvas->Draw("L");
 
-    // -- directly insert to TGraph
-    map_resol_[fiberType]->SetPoint(i_point, energy, fitter.Get("resol"));
-    map_resol_[fiberType]->SetPointError(i_point, 0, 0, fitter.GetUnc("resol"), fitter.GetUnc("resol"));
+    if( noFit_ )
+      Fill_TGraph(fiberType, i_point, energy, mean, absUnc_mean, resol, absUnc_resol);
+    else
+      Fill_TGraph(fiberType, i_point, energy, fitter.Get("mu"), fitter.GetUnc("mu"), fitter.Get("resol"), fitter.GetUnc("resol"));
+  }
 
-    double linearity     = fitter.Get("mu") / energy;
-    double unc_linearity = fitter.GetUnc("mu") / energy;
+  void Fill_TGraph(TString fiberType, int i_point, double energy, 
+                   double mu, double absUnc_mu, double resol, double absUnc_resol) {
+
+    map_resol_[fiberType]->SetPoint(i_point, energy, resol);
+    map_resol_[fiberType]->SetPointError(i_point, 0, 0, absUnc_resol, absUnc_resol);
+
+    double linearity     = mu / energy;
+    double unc_linearity = absUnc_mu / energy;
     if( fiberType == "Sum" ) { // -- divide one more
       linearity /= 2.0;
       unc_linearity /= 2.0;
@@ -214,5 +287,15 @@ private:
 
   TString Get_FileName(int run) { 
     return TString::Format("%s/Hist_Run_%d.root", inputPath_.Data(), run);
+  }
+
+  double AbsUnc_AoverB(double A, double unc_A, double B, double unc_B) {
+    if( B == 0 ) return 0; // -- A/B is not defined
+
+    double relUnc_A = (A == 0) ? 0.0 : unc_A/A;
+    double relUnc_B = (B == 0) ? 0.0 : unc_B/B;
+    double relUnc = std::sqrt(relUnc_A*relUnc_A + relUnc_B*relUnc_B);
+
+    return (A/B)*relUnc;
   }
 };
