@@ -30,7 +30,7 @@ cd analysis # -- directory with the analysis codes
 2. Draw DWC position plots (the output will be used in the event loop to obtain DWC offset)
 ```bash
 ./compile.sh draw_DWC.cc
-./draw_DWC 10482
+./draw_DWC 10482 100
 ```
 -> results: `./DWC/DWC_Run_10482.root` (`./DWC` is automatically created)
 
