@@ -47,9 +47,9 @@ def CreateCondorDir():
 
 if __name__ == '__main__':
   # -- input values -- #
-  # mode = "calib"
+  mode = "calib"
   # mode = "muBeam"
-  mode = "emScan"
+  # mode = "emScan"
   
   # macro = "draw_DWC"
   # macro = "produceHist_ATS"

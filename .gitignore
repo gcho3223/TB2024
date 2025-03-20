@@ -1,0 +1,6 @@
+# ignore output files
+
+*.root
+analysis/postProcess/ATS/plots/
+analysis/postProcess/Calib/plots/
+analysis/condor/condor_v*

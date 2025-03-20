@@ -1,0 +1,51 @@
+
+universe    = vanilla
+executable  = run_macro.sh
+getenv      = True
+output      = /u/user/gcho/DRC/TB2024/TB2024Paper/analysis/condor/condor_v001/job.$(ClusterId).$(ProcId).out
+error       = /u/user/gcho/DRC/TB2024/TB2024Paper/analysis/condor/condor_v001/job.$(ClusterId).$(ProcId).err
+log         = /u/user/gcho/DRC/TB2024/TB2024Paper/analysis/condor/condor_v001/job.$(ClusterId).$(ProcId).log
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
++JobFlavour = "longlunch"
+requirements = (Machine != "cluster341.knu.ac.kr" && Machine != "cluster275.knu.ac.kr" && Memory >= 2048 && Cpus >= 1)
+
+Queue Arguments From (
+  eventLoop 10458
+  eventLoop 10459
+  eventLoop 10457
+  eventLoop 10456
+  eventLoop 10460
+  eventLoop 10463
+  eventLoop 10461
+  eventLoop 10462
+  eventLoop 10464
+  eventLoop 10465
+  eventLoop 10467
+  eventLoop 10466
+  eventLoop 10450
+  eventLoop 10451
+  eventLoop 10449
+  eventLoop 10448
+  eventLoop 10482
+  eventLoop 10483
+  eventLoop 10481
+  eventLoop 10480
+  eventLoop 10468
+  eventLoop 10469
+  eventLoop 10479
+  eventLoop 10470
+  eventLoop 10444
+  eventLoop 10447
+  eventLoop 10445
+  eventLoop 10446
+  eventLoop 10476
+  eventLoop 10477
+  eventLoop 10475
+  eventLoop 10474
+  eventLoop 10478
+  eventLoop 10471
+  eventLoop 10473
+  eventLoop 10472
+)

@@ -1,0 +1,16 @@
+module "drcTB" {
+  requires cplusplus
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBaux.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBaux.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBconfig.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBconfig.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBdetector.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBdetector.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBevt.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBevt.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBmid.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBmid.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBmonit.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBmonit.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBobject.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBobject.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBplotengine.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBplotengine.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TBread.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TBread.h" export * }
+  module "/u/user/gcho/DRC/TB2024/TB2024/include/TButility.h" { header "/u/user/gcho/DRC/TB2024/TB2024/include/TButility.h" export * }
+  link "libdrcTB.so"
+  export *
+}
+

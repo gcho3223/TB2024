@@ -1,0 +1,13 @@
+/u/user/gcho/DRC/TB2024/TB2024/install/lib64/libdrcTB.so
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBaux.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBconfig.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBdetector.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBevt.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBmid.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBmonit.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBobject.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBplotengine.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TBread.h
+/u/user/gcho/DRC/TB2024/TB2024/install/include/TButility.h
+/u/user/gcho/DRC/TB2024/TB2024/install/lib64/libdrcTB_rdict.pcm
+/u/user/gcho/DRC/TB2024/TB2024/install/lib64/libdrcTB.rootmap

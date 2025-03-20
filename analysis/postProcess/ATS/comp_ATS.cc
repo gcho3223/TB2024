@@ -67,6 +67,18 @@ private:
     canvas->RemoveRatioError(); // remove error in the ratio (useful when the error is meaningless)
 
     // canvas->SetSavePath("./output"); // -- path to be saved (default: "./")
+    TString path = "./plots/Modules";
+    if(canvasName.Contains("M1")) {path = "./plots/Modules/M1";}
+    else if(canvasName.Contains("M2")) {path = "./plots/Modules/M2";}
+    else if(canvasName.Contains("M3")) {path = "./plots/Modules/M3";}
+    else if(canvasName.Contains("M4")) {path = "./plots/Modules/M4";}
+    else if(canvasName.Contains("M5")) {path = "./plots/Modules/M5";}
+    else if(canvasName.Contains("M6")) {path = "./plots/Modules/M6";}
+    else if(canvasName.Contains("M7")) {path = "./plots/Modules/M7";}
+    else if(canvasName.Contains("M8")) {path = "./plots/Modules/M8";}
+    else if(canvasName.Contains("M9")) {path = "./plots/Modules/M9";}
+    PlotTool::Make_Dir_IfNotExist(path);
+    canvas->SetSavePath(path);
 
     canvas->Draw("HIST L");
   }
@@ -104,6 +116,18 @@ private:
     canvas->RemoveRatioError(); // remove error in the ratio (useful when the error is meaningless)
 
     // canvas->SetSavePath("./output"); // -- path to be saved (default: "./")
+    TString path = "./plots/Modules";
+    if(canvasName.Contains("M1")) {path = "./plots/Modules/M1";}
+    else if(canvasName.Contains("M2")) {path = "./plots/Modules/M2";}
+    else if(canvasName.Contains("M3")) {path = "./plots/Modules/M3";}
+    else if(canvasName.Contains("M4")) {path = "./plots/Modules/M4";}
+    else if(canvasName.Contains("M5")) {path = "./plots/Modules/M5";}
+    else if(canvasName.Contains("M6")) {path = "./plots/Modules/M6";}
+    else if(canvasName.Contains("M7")) {path = "./plots/Modules/M7";}
+    else if(canvasName.Contains("M8")) {path = "./plots/Modules/M8";}
+    else if(canvasName.Contains("M9")) {path = "./plots/Modules/M9";}
+    PlotTool::Make_Dir_IfNotExist(path);
+    canvas->SetSavePath(path);
 
     canvas->Draw("HIST L");
   }
@@ -155,6 +179,9 @@ private:
     // canvas->RemoveRatioError(); // remove error in the ratio (useful when the error is meaningless)
 
     // canvas->SetSavePath("./output"); // -- path to be saved (default: "./")
+    TString path = "./plots/Runs";
+    PlotTool::Make_Dir_IfNotExist(path);
+    canvas->SetSavePath(path);
 
     canvas->Draw("HIST L");
   }
@@ -205,6 +232,6 @@ private:
 };
 
 void comp_ATS() {
-  PlotProducer producer("./Avg");
+  PlotProducer producer("../../Avg");
   producer.Produce();
 }
